@@ -1,0 +1,9 @@
+name: geo_patrol
+dependencies:
+  - python=3.8
+  - ipython   # convenience dependency
+  - git
+  - pip=21.0
+  - setuptools=65.5.0
+  - pip:
+    - -e .  # this package

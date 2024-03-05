@@ -1,10 +1,15 @@
 
 .DS_Store*
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
+./src/orbit_defender2d/__pycache__
+./src/orbit_defender2d/__pycache__/*
+./src/orbit_defender2d/__pycache__/*.*
 
 # Distribution / packaging
 .Python
