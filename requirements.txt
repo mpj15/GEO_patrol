@@ -1,0 +1,15 @@
+#git+ssh://git@llcad-github.llan.ll.mit.edu/MAST/orbit_defender2d.git@master
+#git:https://github.com/mpj15/spacegym-od2d.git@main
+pip==21.0
+setuptools==65.5.0
+bidict
+numpy==1.21.6
+protobuf==3.20.0
+gym==0.21.0 #It is probable that 0.22.0 works as well without some of the issues of 0.21.0. Those are: 0.21.0 requires an old version of pip (21.0 to ignore the wheel build fail and actually install)
+pettingzoo==1.15.0 #needs to be 15 not 14. 
+torch==1.10.1
+pygame==2.0.3
+zmq #there only appears to be a single verison of this
+tornado==6.1
+-e .
+#Don't forget to pip install -e . in the root of the od2d directory as well
