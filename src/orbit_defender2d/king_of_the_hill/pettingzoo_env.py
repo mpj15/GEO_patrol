@@ -28,7 +28,7 @@ from pygame import gfxdraw      # needs its import to work as pg.gfxdraw for som
 import orbit_defender2d.utils.utils as U
 #import orbit_defender2d.king_of_the_hill.default_game_parameters as DGP
 #import orbit_defender2d.king_of_the_hill.default_game_parameters_old as DGP
-import orbit_defender2d.king_of_the_hill.default_game_parameters_tests as DGP
+import orbit_defender2d.king_of_the_hill.default_game_parameters as DGP
 import orbit_defender2d.king_of_the_hill.utils_for_json_display as UJD
 import orbit_defender2d.king_of_the_hill.game_server as GS
 import orbit_defender2d.king_of_the_hill.render_controls as RC
@@ -62,6 +62,7 @@ GAME_PARAMS = koth.KOTHGameInputArgs(
 
 #Set max ammo for later tests
 MAX_AMMO = 10
+MAX_N_TOKENS = 11
 # observation space flat encoding
 # Note: hard-coding and then cross checking in order
 # to avoid in-advertant observation space dimension changes
@@ -83,7 +84,7 @@ N_BITS_OBS_AMMO = max(
     len(U.int2bitlist(MAX_AMMO)))
 N_BITS_OBS_PER_TOKEN = N_BITS_OBS_OWN_PIECE + N_BITS_OBS_ROLE + N_BITS_OBS_POSITION + N_BITS_OBS_FUEL + N_BITS_OBS_AMMO  # number of bits for a single token observation own_piece + role + position + fuel + ammo
 #N_BITS_OBS_TOKENS_PER_PLAYER = 814  # total number of bits for all of one player's tokens, num_tokens * N_BITS_OBS_PER_TOKEN
-N_BITS_OBS_TOKENS_PER_PLAYER = N_BITS_OBS_PER_TOKEN * int(max(DGP.NUM_TOKENS_PER_PLAYER[U.P1],DGP.NUM_TOKENS_PER_PLAYER[U.P2])) #number of tokens per player * bits per token
+N_BITS_OBS_TOKENS_PER_PLAYER = N_BITS_OBS_PER_TOKEN * int(max(DGP.NUM_TOKENS_PER_PLAYER[U.P1],DGP.NUM_TOKENS_PER_PLAYER[U.P2], MAX_N_TOKENS)) #number of tokens per player * bits per token
 N_BITS_OBS_PER_PLAYER = N_BITS_OBS_SCOREBOARD + 2 * N_BITS_OBS_TOKENS_PER_PLAYER # total number of bits for each player's complete observation, scoreboard + tokens*2
 
 # cross-check hard-coded bit sizes with variables upon which they depend
@@ -105,10 +106,10 @@ assert N_BITS_OBS_PER_TOKEN == N_BITS_OBS_OWN_PIECE + N_BITS_OBS_ROLE + N_BITS_O
 # action space flat encoding
 # Note: hard-coding and then cross checking in order
 # to avoid inadvertent observation space dimension changes
-N_BITS_ACT_PER_TOKEN = len(U.MOVEMENT_TYPES) + len(U.ENGAGEMENT_TYPES)*int(max(DGP.NUM_TOKENS_PER_PLAYER[U.P1],DGP.NUM_TOKENS_PER_PLAYER[U.P2]))  #should be movement types + engagement types*tokens per player
-N_BITS_ACT_PER_PLAYER = N_BITS_ACT_PER_TOKEN * int(max(DGP.NUM_TOKENS_PER_PLAYER[U.P1],DGP.NUM_TOKENS_PER_PLAYER[U.P2])) #should be tokens per player * bits per token action
+N_BITS_ACT_PER_TOKEN = len(U.MOVEMENT_TYPES) + len(U.ENGAGEMENT_TYPES)*int(max(DGP.NUM_TOKENS_PER_PLAYER[U.P1],DGP.NUM_TOKENS_PER_PLAYER[U.P2], MAX_N_TOKENS))  #should be movement types + engagement types*tokens per player
+N_BITS_ACT_PER_PLAYER = N_BITS_ACT_PER_TOKEN * int(max(DGP.NUM_TOKENS_PER_PLAYER[U.P1],DGP.NUM_TOKENS_PER_PLAYER[U.P2], MAX_N_TOKENS)) #should be tokens per player * bits per token action
 
-def env(game_params=None,rllib_env_config=None):
+def env(game_params=None,rllib_env_config=None,training_randomize=None, plr_aliases=None):
     '''
     The env function wraps the environment in 3 wrappers by default. These
     wrappers contain logic that is common to many pettingzoo environments.
@@ -116,20 +117,20 @@ def env(game_params=None,rllib_env_config=None):
     to provide sane error messages. You can find full documentation for these methods
     elsewhere in the developer documentation.
     '''
-    env = raw_env(game_params=game_params, rllib_env_config=rllib_env_config)
+    env = raw_env(game_params=game_params, rllib_env_config=rllib_env_config, training_randomize=training_randomize, plr_aliases=plr_aliases)
     env = wrappers.CaptureStdoutWrapper(env)
     # env = wrappers.AssertOutOfBoundsWrapper(env)
     env = wrappers.OrderEnforcingWrapper(env)
     return env
 
-def raw_env(game_params=None, rllib_env_config=None):
+def raw_env(game_params=None, rllib_env_config=None, training_randomize=None, plr_aliases=None):
     '''
     To support the AEC API, the raw_env() function just uses the parallel_to_aec
     function to convert from a ParallelEnv to an AEC env
 
     See: https://www.pettingzoo.ml/environment_creation#example-custom-parallel-environment
     '''
-    env = parallel_env(game_params=game_params,rllib_env_config=rllib_env_config)
+    env = parallel_env(game_params=game_params,rllib_env_config=rllib_env_config, training_randomize=training_randomize, plr_aliases=plr_aliases)
     env = parallel_to_aec(env)
     return env
 
@@ -151,7 +152,7 @@ def pol2cart(r, a, c):
 class parallel_env(ParallelEnv):
     metadata = {'render.modes': ['human'], "name": "rps_v1"}
 
-    def __init__(self, game_params=None, rllib_env_config=None):
+    def __init__(self, game_params=None, rllib_env_config=None, training_randomize=None,plr_aliases=None, **kwargs):
         '''
         The init method takes in environment arguments and should define the following attributes:
         - possible_agents
@@ -203,6 +204,17 @@ class parallel_env(ParallelEnv):
         else:
             self.workerid = None
 
+        if training_randomize:
+            #If this flag is set, then train on randomized, but symmetric, initial game states
+            self.kothgame.randomize_game_params()
+
+        if plr_aliases is not None:
+            self.plr1_alias = plr_aliases[0]
+            self.plr2_alias = plr_aliases[1]
+        else:
+            self.plr1_alias = U.P1
+            self.plr2_alias = U.P2
+
         # Rendering variables
         # Rendering not always used
         self.render_active = False
@@ -231,8 +243,8 @@ class parallel_env(ParallelEnv):
         self._small_font_size = self._small_font_size_orig
 
         # display dimensions
-        self._x_dim = 1280  # 880
-        self._y_dim = 720  # 560
+        self._x_dim = 1280 #1280  # 880
+        self._y_dim = 720 #720  # 560
         self._aspect_ratio = self._x_dim / self._y_dim
         self._x_dim_orig = self._x_dim
         self._y_dim_orig = self._y_dim
@@ -247,7 +259,8 @@ class parallel_env(ParallelEnv):
                         'gray': (200, 200, 200), 'dark_gray': (100, 100, 100), 'aqua': (0, 180, 180),
                         'red': (200, 0, 120), 'dull_aqua': (120, 150, 150), 'dull_red': (150, 120, 140),
                         'dark_aqua': (0, 80, 80), 'dark_red': (80, 0, 50), 'light_green': (180, 255, 180),
-                        'light_yellow': (255, 255, 200), 'light_aqua': (180, 255, 255), 'light_red': (255, 150, 180)}
+                        'light_yellow': (255, 255, 200), 'light_aqua': (180, 255, 255), 'light_red': (255, 150, 180),
+                        'light_gray': (220, 220, 220)}
         self._bg_color = self._colors['black']
         self._board_color = self._colors['white']
         self._title_color = self._colors['white']
@@ -331,14 +344,15 @@ class parallel_env(ParallelEnv):
 
         if mode == "human" or mode == "debug":
             self._screen.fill(self._bg_color)
-            self._draw_earth()
             self._draw_board()
+            self._draw_earth()
             self._draw_details()
             self._draw_tokens()
             pg.display.update()
 
         if mode == "human":
-            self._watch_for_window_resize()
+            pass
+            #self._watch_for_window_resize()
         elif mode == "debug":
             self._handle_events()
 
@@ -360,7 +374,7 @@ class parallel_env(ParallelEnv):
         g_arc_rect_inner = None
         g_arc_rect_outer = None
 
-        g_line_width = 3
+        g_line_width = 4
 
         # draw board ring by ring from the center outwards
         for ring in range(1, self._ring_count + 1):
@@ -382,6 +396,14 @@ class parallel_env(ParallelEnv):
                                 int(self._board_c[1]), ring_r_min, self._board_color)
             pg.gfxdraw.aacircle(self._screen, int(self._board_c[0]),
                                 int(self._board_c[1]), ring_r_max, self._board_color)
+            pg.gfxdraw.aacircle(self._screen, int(self._board_c[0]),
+                                int(self._board_c[1]), ring_r_min-1, self._board_color)
+            pg.gfxdraw.aacircle(self._screen, int(self._board_c[0]),
+                                int(self._board_c[1]), ring_r_max-1, self._board_color)
+            pg.gfxdraw.aacircle(self._screen, int(self._board_c[0]),
+                                int(self._board_c[1]), ring_r_min+1, self._board_color)
+            pg.gfxdraw.aacircle(self._screen, int(self._board_c[0]),
+                                int(self._board_c[1]), ring_r_max+1, self._board_color)
 
             # draw appropriate number of sectors for current ring
             for sector_idx in range(ring_sectors):
@@ -412,13 +434,23 @@ class parallel_env(ParallelEnv):
 
                 # draw lines on either side of each sector
                 # uses cartesian coordinates (must convert)
-                pg.draw.aaline(self._screen, self._board_color,
-                               pol2cart(ring_r_min, np.degrees(st_angle), self._board_c),
-                               pol2cart(ring_r_max, np.degrees(st_angle), self._board_c))
-                pg.draw.aaline(self._screen, self._board_color,
-                               pol2cart(ring_r_min, np.degrees(end_angle), self._board_c),
-                               pol2cart(ring_r_max, np.degrees(end_angle), self._board_c))
-
+                pg.draw.aalines(self._screen, self._board_color,False,
+                               [(pol2cart(ring_r_min, np.degrees(st_angle), self._board_c)),
+                               (pol2cart(ring_r_max, np.degrees(st_angle), self._board_c)),
+                               (pol2cart(ring_r_min, np.degrees(st_angle), (self._board_c[0],self._board_c[1]+1))),
+                               (pol2cart(ring_r_max, np.degrees(st_angle), (self._board_c[0],self._board_c[1]-1))),
+                               (pol2cart(ring_r_min, np.degrees(st_angle), (self._board_c[0]+1,self._board_c[1]))),
+                               (pol2cart(ring_r_max, np.degrees(st_angle), (self._board_c[0]-1,self._board_c[1]))),                              
+                               ])
+                pg.draw.aalines(self._screen, self._board_color,False,
+                               [(pol2cart(ring_r_min, np.degrees(end_angle), self._board_c)),
+                               (pol2cart(ring_r_max, np.degrees(end_angle), self._board_c)),
+                               (pol2cart(ring_r_min, np.degrees(end_angle), (self._board_c[0],self._board_c[1]+1))),
+                               (pol2cart(ring_r_max, np.degrees(end_angle), (self._board_c[0],self._board_c[1]-1))),
+                               (pol2cart(ring_r_min, np.degrees(end_angle), (self._board_c[0]+1,self._board_c[1]))),
+                               (pol2cart(ring_r_max, np.degrees(end_angle), (self._board_c[0]-1,self._board_c[1]))),                              
+                               ])
+                
                 # number each sector
                 text = self._font.render(str(sector_count), True, self._board_color)
                 self._screen.blit(text,
@@ -590,11 +622,11 @@ class parallel_env(ParallelEnv):
                           (legend_pos[0] + (7.4 * lb_font_size[0]), legend_pos[1] + (3.75 * lb_font_size[1])))
 
         # display team / player titles
-        p1_title = self._large_font_bold.render("Alpha", True, self._p1_color)
-        self._screen.blit(p1_title, (x_mid - (24 * lb_font_size[0]), self._margins[1] + (5.5 * lb_font_size[1])))
+        p1_title = self._large_font_bold.render(self.plr1_alias, True, self._p1_color)
+        self._screen.blit(p1_title, (x_mid - (28 * lb_font_size[0]), self._margins[1] + (5.5 * lb_font_size[1])))
 
-        p2_title = self._large_font_bold.render("Beta", True, self._p2_color)
-        self._screen.blit(p2_title, (x_mid + (20 * lb_font_size[0]), self._margins[1] + (5.5 * lb_font_size[1])))
+        p2_title = self._large_font_bold.render(self.plr2_alias, True, self._p2_color)
+        self._screen.blit(p2_title, (x_mid + (16 * lb_font_size[0]), self._margins[1] + (5.5 * lb_font_size[1])))
 
         guarded_tokens = dict()  # tracks which tokens are being guarded, stores data for displaying guard counts
         attacked_tokens = []  # tracks which tokens are under attack
@@ -608,12 +640,13 @@ class parallel_env(ParallelEnv):
             for token_name, token_state in self.kothgame.token_catalog.items():
                 #There should be actions that are in koth touple format, but they are probably in gym format instead
                 if self.actions:
-                    #print("\n<==== Turn: {} | Phase: {} ====>".format(
-                    #    self.kothgame.game_state[U.TURN_COUNT], 
-                    #    self.kothgame.game_state[U.TURN_PHASE]))
-                    #print("Token: {} | Action: {}".format(token_name, self.actions[token_name].action_type))
-                    if self.actions[token_name].action_type == "shoot" or self.actions[token_name].action_type == "collide":
-                        attacked_tokens.append(token_name)
+                    if token_name in self.actions:
+                        #print("\n<==== Turn: {} | Phase: {} ====>".format(
+                        #    self.kothgame.game_state[U.TURN_COUNT], 
+                        #    self.kothgame.game_state[U.TURN_PHASE]))
+                        #print("Token: {} | Action: {}".format(token_name, self.actions[token_name].action_type))
+                        if self.actions[token_name].action_type == "shoot" or self.actions[token_name].action_type == "collide":
+                            attacked_tokens.append(token_name)
                 else: #TODO: I think this else can be deleted now...
                     if hasattr(self, 'verbose_actions'):
                         #print("Trying engagement with verbose actions")
@@ -629,7 +662,7 @@ class parallel_env(ParallelEnv):
                 continue
             # determine token player (influences color and horizontal alignment)
             split_name = token_name.split(':')
-            if split_name[0] == "alpha":
+            if split_name[0] == U.P1:
                 color = self._p1_color
                 engagement_color = self._p1_color
                 player_x_mid = x_mid - (23 * lb_font_size[0])
@@ -677,19 +710,20 @@ class parallel_env(ParallelEnv):
             pos = token_state.position
             move_str = ""
             if self.actions and self.kothgame.game_state[U.TURN_PHASE] == "movement":
-                    # determine movement type
-                    if self.actions[token_name].action_type == "prograde":
-                        move_str = " > " + str(self.kothgame.board_grid.get_prograde_sector(pos))
-                    elif self.actions[token_name].action_type == "retrograde":
-                        move_str = " > " + str(self.kothgame.board_grid.get_retrograde_sector(pos))
-                    elif self.actions[token_name].action_type == "radial_in":
-                        move_str = " > " + str(self.kothgame.board_grid.get_radial_in_sector(pos))
-                    elif self.actions[token_name].action_type == "radial_out":
-                        move_str = " > " + str(self.kothgame.board_grid.get_radial_out_sector(pos))
-                    else:
-                        pass
+                    if token_name in self.actions:
+                        # determine movement type
+                        if self.actions[token_name].action_type == "prograde":
+                            move_str = " > " + str(self.kothgame.board_grid.get_prograde_sector(pos))
+                        elif self.actions[token_name].action_type == "retrograde":
+                            move_str = " > " + str(self.kothgame.board_grid.get_retrograde_sector(pos))
+                        elif self.actions[token_name].action_type == "radial_in":
+                            move_str = " > " + str(self.kothgame.board_grid.get_radial_in_sector(pos))
+                        elif self.actions[token_name].action_type == "radial_out":
+                            move_str = " > " + str(self.kothgame.board_grid.get_radial_out_sector(pos))
+                        else:
+                            pass
             # display engagement or engagement outcomes
-            elif self.actions and hasattr(self.actions[token_name], "target") and (self.kothgame.game_state[U.TURN_PHASE] == "engagement" or self._eg_outcomes_phase):
+            elif self.actions and token_name in self.actions and hasattr(self.actions[token_name], "target") and (self.kothgame.game_state[U.TURN_PHASE] == "engagement" or self._eg_outcomes_phase):
                 # determine target
                 target_name = self.actions[token_name].target
                 target = target_name.split(':')
@@ -706,7 +740,7 @@ class parallel_env(ParallelEnv):
                     # determine attacker
                     # shoot indicator starts at top corner of attacker details, ends at bottom corner of target details
                     # marked by filled triangles
-                    if split_name[0] == "alpha":
+                    if split_name[0] == U.P1:
                         line_start = (x_mid - (5.5 * lb_font_size[0]), player_y_mid - (1.2 * lb_font_size[1]))
                         line_end = (x_mid + (12 * lb_font_size[0]),
                                     self._margins[1] + (8.7 * lb_font_size[1]) +
@@ -759,7 +793,7 @@ class parallel_env(ParallelEnv):
                     # collide indicator starts at top corner of attacker details,
                     # ends at bottom corner of target details
                     # marked by outlined triangles
-                    if split_name[0] == "alpha":
+                    if split_name[0] == U.P1:
                         line_start = (x_mid - (5.5 * lb_font_size[0]), player_y_mid - (1.2 * lb_font_size[1]))
                         line_end = (x_mid + (12 * lb_font_size[0]),
                                     self._margins[1] + (8.7 * lb_font_size[1]) +
@@ -813,7 +847,7 @@ class parallel_env(ParallelEnv):
                     # guard indicator consists of an outlined square and shield
                     # outlined square contains # of target
                     # outlined shield on target contains # of tokens guarding it
-                    if split_name[0] == "alpha":
+                    if split_name[0] == U.P1:
                         shield_center = (x_mid - (10.2 * lb_font_size[0]),
                                          self._margins[1] + (int(target[2]) * (4 * b_font_size[1])) +
                                          (7.6 * lb_font_size[1]))
@@ -949,7 +983,7 @@ class parallel_env(ParallelEnv):
                 # 'BS': Beta Seeker, 'BBA': Beta Bludger Active, 'BBI': Beta Bludger Inactive
                 sector_occupancies[token_state.position] = {'AS': [], 'ABA': [], 'ABI': [],
                                                             'BS': [], 'BBA': [], 'BBI': []}
-            if split_name[0] == "alpha":
+            if split_name[0] == U.P1:
                 if split_name[1] == U.SEEKER:
                     if token_state.satellite.fuel != self.kothgame.inargs.min_fuel:
                         sector_occupancies[token_state.position]['AS'] = [1]  # track active alpha seeker
@@ -1087,7 +1121,7 @@ class parallel_env(ParallelEnv):
         Check for window resize, and if detected, update the window size and redraw the board
         '''
         timer = 0
-        while timer < 5000:
+        while timer < 1000:
             for event in pg.event.get():
                 if event.type == pg.VIDEORESIZE:
                     h_ratio = event.h / self._y_dim_orig
@@ -1279,60 +1313,96 @@ class parallel_env(ParallelEnv):
                                     (y + (self._button_size / 2) - (0.5 * self._large_font.size(' ')[1]))))
 
         # update only the area of the button
-        pg.display.update(rect)
+        #pg.display.update(rect)
 
     def _draw_earth(self):
         '''
         Displays image of the Earth in the center of the game board that rotates by 180 degrees at each drift phase.
         '''
         # Earth only rotates on drift phase
-        if self.kothgame.game_state[U.TURN_PHASE] == "drift" and self.kothgame.game_state[U.TURN_COUNT] > 0:
-            cycles = 9
-            rot_increment = 20
-        else:
-            cycles = 1
-            rot_increment = 0
-
         ring_r_min = self._board_r / (self._ring_count + 1)
-        for rot_frame in range(cycles):
-            # Increment rotation
-            self._earth_rotation += rot_increment
+        if self.kothgame.game_state[U.TURN_PHASE] == "drift" and self.kothgame.game_state[U.TURN_COUNT] > 0:
+            #Display image with rotation equal to 90 degrees for each turn. Calculate rotatino angle with modulo 360
+            self._earth_rotation = self.kothgame.game_state[U.TURN_COUNT] * 90 % 360
+            
+        # load the image
+        earth_img = pg.image.load(Path(__file__).parent.joinpath("earth.png"))
+        earth_img = pg.transform.scale(earth_img, (2 * ring_r_min, 2 * ring_r_min))
+        
+        # offset from pivot to center
+        w, h = earth_img.get_size()
+        img_rect = earth_img.get_rect(topleft=(self._board_c[0] - (w / 2), self._board_c[1] - (h / 2)))
+        offset_center_to_pivot = pg.math.Vector2(self._board_c) - img_rect.center
 
-            # load the image
-            earth_img = pg.image.load(Path(__file__).parent.joinpath("earth.png"))
-            earth_img = pg.transform.scale(earth_img, (2 * ring_r_min, 2 * ring_r_min))
+        # rotated offset from pivot to center
+        rotated_offset = offset_center_to_pivot.rotate(-self._earth_rotation)
 
-            # offset from pivot to center
-            w, h = earth_img.get_size()
-            img_rect = earth_img.get_rect(topleft=(self._board_c[0] - (w / 2), self._board_c[1] - (h / 2)))
-            offset_center_to_pivot = pg.math.Vector2(self._board_c) - img_rect.center
+        # get rotated image center
+        rotated_image_center = (self._board_c[0] - rotated_offset.x, self._board_c[1] - rotated_offset.y)
 
-            # rotated offset from pivot to center
-            rotated_offset = offset_center_to_pivot.rotate(-self._earth_rotation)
+        # rotate the image and its rectangle
+        rot_img = pg.transform.rotate(earth_img, self._earth_rotation)
+        rot_img_rect = rot_img.get_rect(center=rotated_image_center)
 
-            # get rotated image center
-            rotated_image_center = (self._board_c[0] - rotated_offset.x, self._board_c[1] - rotated_offset.y)
+        # blit the rotated image
+        self._screen.blit(rot_img, rot_img_rect)
 
-            # rotate the image and its rectangle
-            rot_img = pg.transform.rotate(earth_img, self._earth_rotation)
-            rot_img_rect = rot_img.get_rect(center=rotated_image_center)
+        # redraw board lines that get covered by rotated image
+        #pg.draw.aaline(self._screen, self._board_color, (self._board_c[0] - ring_r_min, self._board_c[1]),
+        #                (self._board_c[0] - (2 * ring_r_min), self._board_c[1]))
+        #pg.draw.aaline(self._screen, self._board_color, (self._board_c[0] + ring_r_min, self._board_c[1]),
+        #                (self._board_c[0] + (2 * ring_r_min), self._board_c[1]))
 
-            # blit the rotated image
-            self._screen.blit(rot_img, rot_img_rect)
+        pg.display.update()
+        
+        
+        # if self.kothgame.game_state[U.TURN_PHASE] == "drift" and self.kothgame.game_state[U.TURN_COUNT] > 0:
+        #     cycles = 9
+        #     rot_increment = 10
+        # else:
+        #     cycles = 1
+        #     rot_increment = 0
 
-            # redraw board lines that get covered by rotated image
-            pg.draw.aaline(self._screen, self._board_color, (self._board_c[0] - ring_r_min, self._board_c[1]),
-                           (self._board_c[0] - (2 * ring_r_min), self._board_c[1]))
-            pg.draw.aaline(self._screen, self._board_color, (self._board_c[0] + ring_r_min, self._board_c[1]),
-                           (self._board_c[0] + (2 * ring_r_min), self._board_c[1]))
+        # ring_r_min = self._board_r / (self._ring_count + 1)
+        # for rot_frame in range(cycles):
+        #     # Increment rotation
+        #     self._earth_rotation += rot_increment
 
-            pg.display.update(rot_img_rect)
+        #     # load the image
+        #     earth_img = pg.image.load(Path(__file__).parent.joinpath("earth.png"))
+        #     earth_img = pg.transform.scale(earth_img, (2 * ring_r_min, 2 * ring_r_min))
+
+        #     # offset from pivot to center
+        #     w, h = earth_img.get_size()
+        #     img_rect = earth_img.get_rect(topleft=(self._board_c[0] - (w / 2), self._board_c[1] - (h / 2)))
+        #     offset_center_to_pivot = pg.math.Vector2(self._board_c) - img_rect.center
+
+        #     # rotated offset from pivot to center
+        #     rotated_offset = offset_center_to_pivot.rotate(-self._earth_rotation)
+
+        #     # get rotated image center
+        #     rotated_image_center = (self._board_c[0] - rotated_offset.x, self._board_c[1] - rotated_offset.y)
+
+        #     # rotate the image and its rectangle
+        #     rot_img = pg.transform.rotate(earth_img, self._earth_rotation)
+        #     rot_img_rect = rot_img.get_rect(center=rotated_image_center)
+
+        #     # blit the rotated image
+        #     self._screen.blit(rot_img, rot_img_rect)
+
+        #     # redraw board lines that get covered by rotated image
+        #     pg.draw.aaline(self._screen, self._board_color, (self._board_c[0] - ring_r_min, self._board_c[1]),
+        #                    (self._board_c[0] - (2 * ring_r_min), self._board_c[1]))
+        #     pg.draw.aaline(self._screen, self._board_color, (self._board_c[0] + ring_r_min, self._board_c[1]),
+        #                    (self._board_c[0] + (2 * ring_r_min), self._board_c[1]))
+
+        #     pg.display.update(rot_img_rect)
 
     def draw_win(self, winner):
         '''Displays winner clearly and updates score when game finishes'''
-        if winner == "alpha":
+        if winner == U.P1:
             win_color = self._p1_color
-        elif winner == "beta":
+        elif winner == U.P2:
             win_color = self._p2_color
         else:
             win_color = self._null_color
@@ -1402,6 +1472,12 @@ class parallel_env(ParallelEnv):
         self.gameover = False
         self.render_json = None
         return observations
+    
+    def screen_shot(self, file_name):
+        '''
+        Save a screenshot of the current game state to a file.
+        '''
+        pg.image.save(self._screen, file_name)
 
     def step(self, actions):
         '''
@@ -2404,7 +2480,7 @@ class KOTHObservationSpaces:
         '''
 
         if game.n_tokens_alpha != game.n_tokens_beta:
-            raise NotImplementedError('Both playe must have same number of tokens')
+            raise NotImplementedError('Both players must have same number of tokens')
         n_tokens_per_player = game.n_tokens_alpha
 
         # non-token game observations

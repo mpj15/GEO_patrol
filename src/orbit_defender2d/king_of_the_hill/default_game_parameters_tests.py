@@ -66,7 +66,7 @@ INIT_AMMO = {
         },
     U.P2:{
         U.SEEKER:   0,
-        U.BLUDGER:  1,
+        U.BLUDGER:  4,
         },
     }
 
@@ -164,8 +164,8 @@ FUEL_POINTS_FACTOR_BLUDGER = {
     }
 
 WIN_SCORE = {
-    U.P1:500.0,
-    U.P2:500.0
+    U.P1:350.0,
+    U.P2:350.0
     }
 
 ILLEGAL_ACT_SCORE = -1000.0
