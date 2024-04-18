@@ -380,7 +380,7 @@ def run_CLI_client():
 
     local_game = koth.KOTHGame(**GAME_PARAMS._asdict()) 
 
-    logfile = koth.start_log_file('./logs/game_log_human_human')
+    logfile = koth.start_log_file('./logs/game_log_server_client')
 
     while not cur_game_state[GS.GAME_DONE]:
 
@@ -429,9 +429,8 @@ def run_CLI_client():
         penv.render(mode="human")
 
         #check if plr_client has attribute engagement_outcomes
-        if hasattr(plr_client, 'engagement_outcomes'):
-            if plr_client.engagement_outcomes is not None:
-                print_engagement_outcomes_list(plr_client.engagement_outcomes, file=logfile)
+        if plr_client.engagement_outcomes is not None:
+            print_engagement_outcomes_list(plr_client.engagement_outcomes, file=logfile)
 
     print("Stopping {} ({}) client thread...".format(plr_client.alias, plr_client.player_id))
     plr_client.stop()

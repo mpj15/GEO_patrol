@@ -53,7 +53,7 @@ def run_game(model_path_alpha, model_path_beta):
     model_beta.eval()
 
     #start logfile
-    logfile = koth.start_log_file('./logs/AI_game_log')
+    logfile = koth.start_log_file('./logs/game_log_AIvsAI')
 
     # iterate through game with valid random actions
     while True:

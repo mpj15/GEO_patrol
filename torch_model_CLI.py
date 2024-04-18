@@ -43,7 +43,7 @@ def run_game(model_path_beta):
     print("Player Bravo is: "+alias)
     sleep(1)
     #start logfile
-    logfile = koth.start_log_file('./logs/game_log', p1_alias="AI", p2_alias=alias)
+    logfile = koth.start_log_file('./logs/game_log_AI_vs_player', p1_alias="AI", p2_alias=alias)
 
     GAME_PARAMS = koth.KOTHGameInputArgs(
         max_ring=DGP.MAX_RING,

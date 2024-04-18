@@ -314,7 +314,7 @@ def run_listener(game_server, listener_client, render=True):
     print("Player 1: ", p1_alias)
     print("Player 2: ", p2_alias)
     logfilename = './logs/game_log_'+p1_alias+'_vs_'+p2_alias
-    logfile = koth.start_log_file('./logs/game_log', p1_alias=p1_alias, p2_alias=p2_alias)
+    logfile = koth.start_log_file('./logs/game_log_server', p1_alias=p1_alias, p2_alias=p2_alias)
 
     if render:
         #Create local penv game to render
@@ -342,7 +342,8 @@ def run_listener(game_server, listener_client, render=True):
             actions_dict = new_dict
         if listener_client.engagement_outcomes is not None:
             engagement_outcomes = listener_client.engagement_outcomes
-            penv.kothgame.engagement_outcomes = koth.arbitrary_engagement_outcomes_from_server(engagement_outcomes)
+            penv.kothgame.engagement_outcomes = koth.KOTHGame.arbitrary_engagement_outcomes_from_server(engagement_outcomes)
+            local_game.engagement_outcomes = penv.kothgame.engagement_outcomes
         else:
             engagement_outcomes = None
             penv.kothgame.engagement_outcomes = None
