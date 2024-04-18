@@ -3,9 +3,9 @@ Welcome to GEO Patrol. This is a two-player, perfect information, simultaneous m
 
 For more information, see the OD2D repo here: https://github.com/mpj15/spacegym-od2d 
 
-A rule book and user guide for the baseline OD2D game (King of the Hill) can be found at the OD2D Repo's Wiki, here: https://github.com/mpj15/spacegym-od2d/wiki
-
 GEO Patrol is an asymmetric version of the baseline OD2D game. In GEO Patrol, one side plays offense, with more Patrol satellites with more fuel but no ammo. The other side plays defense, with fewer Patrol satellites and less fuel but more firepower.
+
+A rule book is included in this repo and a more info can also be found at the OD2D Repo's Wiki, here: https://github.com/mpj15/spacegym-od2d/wiki
 
 ## Installation
 
