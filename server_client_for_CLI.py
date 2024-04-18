@@ -87,6 +87,7 @@ class PlayerClient(object):
         self.alias = plr_alias
         self.player_id = None
         self.game_state = None
+        self.engagement_outcomes = None
         self._lock = threading.Lock()
         self._stop = threading.Event()
 

@@ -63,6 +63,7 @@ class ListenerClient(object):
         self.player_id = None
         self.game_state = None
         self.actions = None
+        self.engagement_outcomes = None
         self.player_registry = None
         self._lock = threading.Lock()
         self._stop = threading.Event()
