@@ -431,7 +431,9 @@ def run_CLI_client():
 
         #check if plr_client has attribute engagement_outcomes
         if plr_client.engagement_outcomes is not None:
-            print_engagement_outcomes_list(plr_client.engagement_outcomes, file=logfile)
+            with open(logfile, 'a') as f:
+                print_engagement_outcomes_list(plr_client.engagement_outcomes, file=f)
+            plr_client.engagement_outcomes = None
 
     print("Stopping {} ({}) client thread...".format(plr_client.alias, plr_client.player_id))
     plr_client.stop()

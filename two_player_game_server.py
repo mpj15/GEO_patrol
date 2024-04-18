@@ -343,7 +343,7 @@ def run_listener(game_server, listener_client, render=True):
             actions_dict = new_dict
         if listener_client.engagement_outcomes is not None:
             engagement_outcomes = listener_client.engagement_outcomes
-            penv.kothgame.engagement_outcomes = koth.KOTHGame.arbitrary_engagement_outcomes_from_server(engagement_outcomes)
+            penv.kothgame.engagement_outcomes = koth.KOTHGame.arbitrary_engagement_outcomes_from_server(engagement_outcomes=engagement_outcomes)
             local_game.engagement_outcomes = penv.kothgame.engagement_outcomes
         else:
             engagement_outcomes = None
