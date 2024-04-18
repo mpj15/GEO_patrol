@@ -234,7 +234,6 @@ class PlayerClient(object):
             #plr_actions = [actions[tok[GS.PIECE_ID]] for tok in self.game_state[GS.TOKEN_STATES] if koth.parse_token_id(tok[GS.PIECE_ID])[0] == self.player_id]
             if context == U.MOVEMENT:
                 plr_actions = [{GS.PIECE_ID: tok[GS.PIECE_ID], GS.ACTION_TYPE: actions[tok[GS.PIECE_ID]][0]} for tok in self.game_state[GS.TOKEN_STATES] if koth.parse_token_id(tok[GS.PIECE_ID])[0] == self.player_id]
-                print(plr_actions)
                 req_msg[GS.CONTEXT] = GS.MOVE_PHASE
                 req_msg[GS.DATA][GS.KIND] = GS.MOVE_PHASE_REQ
                 req_msg[GS.DATA][GS.MOVEMENT_SELECTIONS] = plr_actions
@@ -413,6 +412,9 @@ def run_CLI_client():
             #Send the actions to the game server
             plr_client.send_action_req(context=cur_game_state[GS.TURN_PHASE], actions=actions_dict)
 
+        #if cur_game_state[GS.TURN_PHASE] == U.MOVEMENT and cur_game_state[GS.TURN_NUMBER] == 0:
+        #    #Log the initial movement phase actions
+        #    koth.log_game_to_file(local_game, logfile=logfile, actions=actions_dict)
 
         # wait for game state to advance
         while cur_game_state[GS.TURN_PHASE] == turnphase and not cur_game_state[GS.GAME_DONE]:
@@ -422,18 +424,23 @@ def run_CLI_client():
 
         #update the local_game with the new game state from the server and update the render
         local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
+        if plr_client.engagement_outcomes is not None:
+            local_game.engagement_outcomes = local_game.arbitrary_engagement_outcomes_from_server(plr_client.engagement_outcomes)[1]
+            plr_client.engagement_outcomes = None
         penv.kothgame = local_game
         if actions_dict is not None:
             koth.print_actions(actions_dict)
+            koth.log_game_to_file(local_game, logfile=logfile, actions=actions_dict)
             actions_dict = None
-        koth.log_game_to_file(local_game, logfile=logfile, actions=actions_dict)
+        else:
+            koth.log_game_to_file(local_game, logfile=logfile)
         penv.render(mode="human")
 
         #check if plr_client has attribute engagement_outcomes
-        if plr_client.engagement_outcomes is not None:
-            with open(logfile, 'a') as f:
-                print_engagement_outcomes_list(plr_client.engagement_outcomes, file=f)
-            plr_client.engagement_outcomes = None
+        #if plr_client.engagement_outcomes is not None:
+        #    with open(logfile, 'a') as f:
+        #        print_engagement_outcomes_list(plr_client.engagement_outcomes, file=f)
+        #    plr_client.engagement_outcomes = None
 
     print("Stopping {} ({}) client thread...".format(plr_client.alias, plr_client.player_id))
     plr_client.stop()
