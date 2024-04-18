@@ -340,8 +340,8 @@ def run_CLI_client():
     plr_client = PlayerClient(
         #router_addr="tcp://localhost:{}".format(ROUTER_PORT_NUM),
         #pub_addr="tcp://localhost:{}".format(PUB_PORT_NUM),
-        router_addr="tcp://10.47.7.76.220:{}".format(ROUTER_PORT_NUM),
-        pub_addr="tcp://10.47.7.76.220:{}".format(PUB_PORT_NUM),
+        router_addr="tcp://10.47.7.76:{}".format(ROUTER_PORT_NUM),
+        pub_addr="tcp://10.47.7.76:{}".format(PUB_PORT_NUM),
         plr_alias=alias
     )
 
@@ -359,7 +359,7 @@ def run_CLI_client():
     #Wait for the other player to connect, if necessary
     #If the other player is not connected, game state will be None
     while cur_game_state is None:
-        print("Waiting on human player to connect to router port {}".format(ROUTER_PORT_NUM))
+        print("Waiting on other player to connect")
         cur_game_state = plr_client.game_state
         sleep(1)
     
