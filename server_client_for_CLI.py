@@ -478,6 +478,5 @@ def run_CLI_client():
 
 
 
-#if __name__ == "__main__":
-def run_client():
+if __name__ == "__main__":
     run_CLI_client()

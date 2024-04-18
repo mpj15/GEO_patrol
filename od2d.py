@@ -44,7 +44,7 @@ def run():
             # You have to have a preconfigured remote machine
             # running the server (two_player_game_server.py). 
             # And another player also running this client.
-            sc.run_client()
+            sc.run_CLI_client()
             print("Game finished.")
             time.sleep(3)
         elif gameMode == 4:
