@@ -3,7 +3,7 @@
 import numpy as np
 import orbit_defender2d.utils.utils as U
 import orbit_defender2d.king_of_the_hill.pettingzoo_env as PZE
-import game_parameters_case2 as DGP
+import game_parameters_default as DGP
 #import orbit_defender2d.king_of_the_hill.default_game_parameters as DGP
 #import orbit_defender2d.king_of_the_hill.default_game_parameters_small as DGP
 from orbit_defender2d.king_of_the_hill import koth
@@ -16,7 +16,7 @@ def ai_v_ai():
    
     #model_path_alpha = "./policies/model_3800_smallBoard_15March.pt" #This was trained on 1200 iterations in RLlib
     #model_path_beta = "./policies/model_3800_smallBoard_15March.pt" #This was trained on 1200 iterations in RLlib
-    model_path_beta = "./policies/model_D3_8600_10Apr.pt" #This was trained on 1200 iterations in RLlib
+    model_path_beta = "./policies/model_D4_9600.pt" #This was trained on 1200 iterations in RLlib
     model_path_alpha = "./policies/model_O3_6500.pt"
     run_game(model_path_alpha,model_path_beta)
 

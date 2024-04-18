@@ -212,6 +212,6 @@ def run_game(model_path_beta):
     #model_path_beta = "./policies/model_offense.pt" #This was trained on 1200 iterations in RLlib
     #model_path_beta = "./policies/model_2400_08March_smallBoard.pt" #2400 iterations of board without outer ring. Trained on randagm init game params.
 def human_v_ai():
-    model_path_beta = "./policies/model_3800_smallBoard_15March.pt" #3800 iterations of board without outer ring. Trained on randagm init game params.
+    model_path_beta = "./policies/model_D4_9600.pt" #3800 iterations of board without outer ring. Trained on randagm init game params.
 
     run_game(model_path_beta)
