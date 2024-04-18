@@ -1,11 +1,11 @@
 ### GEO Patol
-Welcome to GEO Patrol. This is a two-player, perfect information, simultaneous move, discrete game, based on the Orbit Defender 2D (OD2D) environment. OD2D was originally developed by MIT Lincoln Laboratory.
+Welcome to GEO Patrol. This is a two-player, perfect information, simultaneous move, discrete game based on the Orbit Defender 2D (OD2D) environment. OD2D was originally developed by MIT Lincoln Laboratory as an environment for modelling non-cooperative satellite interactions at a high-level of abstraction.
 
-For more information, see the OD2D repo here: https://github.com/mpj15/spacegym-od2d 
+For more information, see the rulebook: https://github.com/mpj15/GEO_patrol/blob/main/GEO_Patrol_Rule_Book.pdf
+
+Also the OD2D repo's wiki: https://github.com/mpj15/spacegym-od2d/wiki
 
 GEO Patrol is an asymmetric version of the baseline OD2D game. In GEO Patrol, one side plays offense, with more Patrol satellites with more fuel but no ammo. The other side plays defense, with fewer Patrol satellites and less fuel but more firepower.
-
-A rule book is included in this repo and a more info can also be found at the OD2D Repo's Wiki, here: https://github.com/mpj15/spacegym-od2d/wiki
 
 ## Installation
 
