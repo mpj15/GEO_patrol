@@ -60,7 +60,7 @@ def run_game(model_path_beta):
     print("Player Alpha is: "+alias)
     sleep(1)
     #start logfile
-    logfile = koth.start_log_file('./logs/game_log', p1_alias=alias, p2_alias="AI")
+    logfile = koth.start_log_file('./logs/game_log_human_AI', p1_alias=alias, p2_alias="AI")
 
     # Render pygame window
     penv.render(mode="human")

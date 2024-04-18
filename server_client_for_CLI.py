@@ -16,7 +16,7 @@ TODO: Make the player client class a separate file that can be imported by both 
 import numpy as np
 import orbit_defender2d.utils.utils as U
 import orbit_defender2d.king_of_the_hill.pettingzoo_env as PZE
-import orbit_defender2d.king_of_the_hill.default_game_parameters as DGP
+import game_parameters_case1 as DGP
 import orbit_defender2d.king_of_the_hill.game_server as GS
 from orbit_defender2d.king_of_the_hill import koth
 
@@ -340,8 +340,8 @@ def run_CLI_client():
     plr_client = PlayerClient(
         #router_addr="tcp://localhost:{}".format(ROUTER_PORT_NUM),
         #pub_addr="tcp://localhost:{}".format(PUB_PORT_NUM),
-        router_addr="tcp://173.76.104.220:{}".format(ROUTER_PORT_NUM),
-        pub_addr="tcp://173.76.104.220:{}".format(PUB_PORT_NUM),
+        router_addr="tcp://10.47.7.76.220:{}".format(ROUTER_PORT_NUM),
+        pub_addr="tcp://10.47.7.76.220:{}".format(PUB_PORT_NUM),
         plr_alias=alias
     )
 
@@ -378,7 +378,9 @@ def run_CLI_client():
     print("Player UUID: {}".format(plr_client.player_uuid))
 
 
-    local_game = koth.KOTHGame(**GAME_PARAMS._asdict()) #not sure if I should do this or local_game = penv.kothgame. The GAME_PARAMS are the same for now... both pull from DGP
+    local_game = koth.KOTHGame(**GAME_PARAMS._asdict()) 
+
+    logfile = koth.start_log_file('./logs/game_log_human_human')
 
     while not cur_game_state[GS.GAME_DONE]:
 
@@ -421,6 +423,7 @@ def run_CLI_client():
         local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
         penv.kothgame = local_game
         print_game_info(game_state=cur_game_state)
+        koth.log_game_to_file(local_game, logfile=logfile, actions=actions_dict)
         penv.render(mode="human")
 
         #check if plr_client has attribute engagement_outcomes
@@ -475,5 +478,6 @@ def run_CLI_client():
 
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
+def run_client():
     run_CLI_client()

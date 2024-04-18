@@ -6,8 +6,7 @@ import numpy as np
 import orbit_defender2d.utils.utils as U
 import copy
 import orbit_defender2d.king_of_the_hill.pettingzoo_env as PZE
-import orbit_defender2d.king_of_the_hill.default_game_parameters as DGP
-#import orbit_defender2d.king_of_the_hill.default_game_parameters_small as DGP
+import game_parameters_case1 as DGP
 from orbit_defender2d.king_of_the_hill import koth
 from orbit_defender2d.king_of_the_hill import game_server as GS
 from orbit_defender2d.king_of_the_hill.examples.server_utils import *
@@ -314,6 +313,7 @@ def run_listener(game_server, listener_client, render=True):
     p2_alias = plr_reg[1][GS.PLAYER_ID]+": "+plr_reg[1][GS.PLAYER_ALIAS]
     print("Player 1: ", p1_alias)
     print("Player 2: ", p2_alias)
+    logfilename = './logs/game_log_'+p1_alias+'_vs_'+p2_alias
     logfile = koth.start_log_file('./logs/game_log', p1_alias=p1_alias, p2_alias=p2_alias)
 
     if render:

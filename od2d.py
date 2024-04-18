@@ -4,6 +4,7 @@
 import time
 import torch_model_play as tmp
 import torch_model_CLI as cli
+import server_client_for_CLI as sc
 import signal
 import sys
 
@@ -27,21 +28,27 @@ def run():
         gameMode = int(input("Enter your choice: "))
         #If user chooses 1, run AIvsAI.py
         if gameMode == 1:
+            #run run_AI_vs_AI as a demo
             tmp.ai_v_ai()
             print("Game finished.")
             time.sleep(1)
 
         elif gameMode == 2:
-            #run run_Human_vs_AI.py
+            #run human vs AI game
             cli.human_v_ai()
             print("Game finished.")
             time.sleep(1)
         elif gameMode == 3:
-            print("NOT IMPLEMENTED YET")
+            # Run human vs human game from a remote machine.
+            # Note this is for running a client to connect. 
+            # You have to have a preconfigured remote machine
+            # running the server (two_player_game_server.py). 
+            # And another player also running this client.
+            sc.run_client()
+            print("Game finished.")
             time.sleep(3)
-            #run run_Human_vs_Remote.py
-            #import run_Human_vs_Remote
         elif gameMode == 4:
+            #Exit
             print("Exiting game.")
             time.sleep(1)
             break
