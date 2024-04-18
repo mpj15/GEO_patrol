@@ -339,10 +339,22 @@ def run_listener(game_server, listener_client, render=True):
                 elif len(value) == 1: #movement 
                     new_dict[key] = U.MovementTuple(action_type=value[0])
             penv.actions = new_dict
+            actions_dict = new_dict
+        if listener_client.engagement_outcomes is not None:
+            engagement_outcomes = listener_client.engagement_outcomes
+            penv.kothgame.engagement_outcomes = koth.arbitrary_engagement_outcomes_from_server(engagement_outcomes)
+        else:
+            engagement_outcomes = None
+            penv.kothgame.engagement_outcomes = None
 
         if tmp_game_state[GS.TURN_PHASE] != turn_phase:
             koth.print_game_info(local_game)
-            koth.log_game_to_file(local_game, logfile)
+            if actions_dict is not None:
+                koth.print_actions(actions_dict)
+                koth.log_game_to_file(local_game, logfile,actions=actions_dict)
+                actions_dict = None
+            else:
+                koth.log_game_to_file(local_game, logfile)
             # if tmp_game_state[GS.TURN_PHASE] == U.DRIFT:
             #     if hasattr(listener_client, 'engagement_outcomes'):
             #         with open(logfile, 'a') as f:

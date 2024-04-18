@@ -314,7 +314,7 @@ class PlayerClient(object):
                         self.engagement_outcomes = msg[GS.DATA][GS.RESOLUTION_SEQUENCE]
                     assert_valid_game_state(game_state=self.game_state)
 
-                print('{} client received and processed message on SUB!'.format(self.alias))
+                print('{} client received and processed message'.format(self.alias))
 
             except zmq.Again as e:
                 # no messages waiting to be processed
@@ -422,14 +422,16 @@ def run_CLI_client():
         #update the local_game with the new game state from the server and update the render
         local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
         penv.kothgame = local_game
-        print_game_info(game_state=cur_game_state)
+        if actions_dict is not None:
+            koth.print_actions(actions_dict)
+            actions_dict = None
         koth.log_game_to_file(local_game, logfile=logfile, actions=actions_dict)
         penv.render(mode="human")
 
         #check if plr_client has attribute engagement_outcomes
         if hasattr(plr_client, 'engagement_outcomes'):
             if plr_client.engagement_outcomes is not None:
-                print_engagement_outcomes_list(plr_client.engagement_outcomes)
+                print_engagement_outcomes_list(plr_client.engagement_outcomes, file=logfile)
 
     print("Stopping {} ({}) client thread...".format(plr_client.alias, plr_client.player_id))
     plr_client.stop()
