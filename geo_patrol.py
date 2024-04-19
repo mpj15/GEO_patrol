@@ -1,5 +1,4 @@
 import time
-import server_client_for_CLI as sc
 import geo_patrol_games as gpg
 
 GS_HOST_ADDR = "192.168.1.11"
