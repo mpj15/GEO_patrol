@@ -47,25 +47,11 @@ def run():
             #run human vs AI game
             #For now, just run the AI as offense and human as defense
             model_path_alpha = MODEL_PATH_ALPHA
+            model_path_beta = None
             case_num = get_case_num()
-            if case_num == 1:
-                # Run case 1
-                gpg.human_v_ai_game_mode(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=1)
-                print("Game finished.")
-                time.sleep(1)
-            elif case_num == 2:
-                # Run case 2
-                gpg.human_v_ai_game_mode(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=2)
-                print("Game finished.")
-                time.sleep(1)
-            elif case_num == 3:
-                # Run case 3
-                gpg.human_v_ai_game_mode(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=3)
-                print("Game finished.")
-                time.sleep(1)
-            else:
-                print("Invalid choice. Please try again.")
-                time.sleep(1)
+            gpg.human_v_ai_game_mode(model_path_alpha= model_path_alpha,model_path_beta=model_path_beta, case_num=case_num)
+            print("Game finished.")
+            time.sleep(1)            
         elif gameMode == 3:
             # Run human vs human game from a remote machine.
             # Note this is for running a client to connect. 

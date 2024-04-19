@@ -28,7 +28,7 @@ def ai_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
         GP = GP_3
     else:
         GP = DGP
-    run_game_ai_vs_ai(model_path_alpha,model_path_beta, GP)
+    run_game_ai_vs_ai(model_path_alpha,model_path_beta, GP, case_num)
 
 def human_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
     if case_num == 1:
@@ -50,11 +50,11 @@ def human_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
     if model_path_alpha == None:
            #The computer plays as beta, player 2, and the human plays as alpha, player 1
            #Alpha is offense and beta is defense, so human in this case is offense
-        run_game_humanA_v_aiB(model_path_beta, GP)
+        run_game_humanA_v_aiB(model_path_beta, GP, case_num)
     if model_path_beta == None:
         #The computer plays as alpha, player 1, and the human plays as beta, player 2
         #Alpha is offense and beta is defense, so human in this case is defense
-        run_game_humanB_v_aiA(model_path_alpha, GP)
+        run_game_humanB_v_aiA(model_path_alpha, GP, case_num)
 
 def run_server_client_game_mode(gs_host_addr,case_num):
     if case_num == 1:
@@ -65,7 +65,7 @@ def run_server_client_game_mode(gs_host_addr,case_num):
         GP = GP_3
     else:
         GP = DGP
-    run_server_client_game(gs_host_addr, GP)
+    run_server_client_game(gs_host_addr, GP, case_num)
 
 
 
@@ -93,7 +93,7 @@ def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP, case_num):
         fuel_points_factor_bludger=GP.FUEL_POINTS_FACTOR_BLUDGER,
         )
     # create and reset pettingzoo env
-    penv = PZE.parallel_env(game_params=GAME_PARAMS, training_randomize=True, plr_aliases=None)
+    penv = PZE.parallel_env(game_params=GAME_PARAMS, training_randomize=False, plr_aliases=None)
     obs = penv.reset()
     # Update rendered pygame window
     #penv.render(mode="debug")
@@ -201,7 +201,7 @@ def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP, case_num):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
-    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P1+":AI")
+    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":AI")
 
     cur_game_state = penv.kothgame.game_state
     if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
