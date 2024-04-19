@@ -4,7 +4,7 @@
 $directory = "."
 $conda_env = "geo_patrol"
 # $script = "checkpoint_just_torch_CLI.py"
-$script = "od2d.py"
+$script = "geo_patrol.py"
 
 # Open a new command window
 
