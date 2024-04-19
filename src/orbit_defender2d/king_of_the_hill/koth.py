@@ -1513,6 +1513,7 @@ def print_endgame_status(game, file=None):
     '''
     Print the endgame status, scores, winner, termination conditions.
     '''
+    print("\n<====   GAME   OVER   ====>", file=file)
     winner = None
     alpha_score =game.game_state[U.P1][U.SCORE]
     beta_score = game.game_state[U.P2][U.SCORE]
@@ -1522,7 +1523,7 @@ def print_endgame_status(game, file=None):
         winner = U.P2
     else:
         winner = 'draw'
-
+    print("Termination Condition(s):", file=file)
     cur_game_state = game.game_state
     if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= game.inargs.min_fuel:
         print(U.P1+" seeker out of fuel", file=file)
@@ -1533,9 +1534,9 @@ def print_endgame_status(game, file=None):
     if cur_game_state[U.P2][U.SCORE]  >= game.inargs.win_score[U.P2]:
         print(U.P2+" reached Win Score", file=file)
     if cur_game_state[U.TURN_COUNT]  >= game.inargs.max_turns:
-        print("max turns reached", file=file)
+        print("max sturns reached", file=file)
 
-    print("\n====GAME FINISHED====\nWinner: {}\nScore: {}|{}\n=====================\n".format(winner, alpha_score, beta_score), file=file)
+    print("\n=====================\nWinner: {}\nScore: {}|{}\n=====================\n".format(winner, alpha_score, beta_score), file=file)
     #print the time at the end of the game
     print("Date: {}".format(datetime.datetime.now()), file=file)
 
@@ -1561,6 +1562,7 @@ def log_game_to_file(game, logfile, actions=None):
 
         #If the game is done, then print the final score and winner
         if game_done:
+            print("\n<==== Turn: {} | Phase: {} ====>".format(turn, phase), file=f)
             #Print final engagement outcomes
             print_engagement_outcomes(game.engagement_outcomes, file=f)
             print_game_info(game, file=f)

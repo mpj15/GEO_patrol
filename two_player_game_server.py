@@ -353,19 +353,22 @@ def run_listener(game_server, listener_client, render=True):
             penv.kothgame.engagement_outcomes = None
 
         if tmp_game_state[GS.TURN_PHASE] != turn_phase:
-            koth.print_game_info(local_game)
-            if actions_dict is not None:
-                koth.print_actions(actions_dict)
-                koth.log_game_to_file(local_game, logfile,actions=actions_dict)
-                actions_dict = None
-            else:
-                koth.log_game_to_file(local_game, logfile)
+            #Log the info from the prior turn phase
+            local_game.game_state[U.TURN_PHASE] = turn_phase
+            if turn_phase == U.DRIFT:
+                local_game.game_state[U.TURN_COUNT] = tmp_game_state[GS.TURN_NUMBER] - 1
+            koth.print_game_info(game=local_game)
+            koth.print_actions(actions=actions_dict)
+            koth.log_game_to_file(game=local_game, logfile=logfile,actions=actions_dict)
+            actions_dict = None
             # if tmp_game_state[GS.TURN_PHASE] == U.DRIFT:
             #     if hasattr(listener_client, 'engagement_outcomes'):
             #         with open(logfile, 'a') as f:
             #             print_engagement_outcomes_list(listener_client.engagement_outcomes, file=f)
             #             f.close()
             turn_phase = tmp_game_state[GS.TURN_PHASE]
+            local_game.game_state[U.TURN_PHASE] = turn_phase
+            local_game.game_state[U.TURN_COUNT] = tmp_game_state[GS.TURN_NUMBER]
         
         if render:
             penv.render(mode='human')

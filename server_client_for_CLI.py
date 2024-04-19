@@ -422,8 +422,13 @@ def run_CLI_client():
             print('waiting for turn phase {} to advance'.format(cur_game_state[GS.TURN_PHASE]))
             cur_game_state = plr_client.game_state
 
+        if cur_game_state[GS.GAME_DONE] is True:
+            local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
+            koth.print_endgame_status(local_game)
+            koth.log_game_to_file(local_game, logfile)
+            break
+
         #update the local_game with the new game state from the server and update the render
-        local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
         if plr_client.engagement_outcomes is not None:
             local_game.engagement_outcomes = local_game.arbitrary_engagement_outcomes_from_server(plr_client.engagement_outcomes)[0]
             plr_client.engagement_outcomes = None
@@ -435,6 +440,8 @@ def run_CLI_client():
         else:
             koth.log_game_to_file(local_game, logfile=logfile)
         penv.render(mode="human")
+
+        local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
 
         #check if plr_client has attribute engagement_outcomes
         #if plr_client.engagement_outcomes is not None:
