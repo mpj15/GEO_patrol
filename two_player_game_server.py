@@ -329,6 +329,7 @@ def run_listener(game_server, listener_client, render=True):
         local_game = penv.kothgame
         local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(tmp_game_state)
         penv.kothgame = local_game
+        
         if listener_client.actions is not None:
             new_dict = {}
             for key, value in listener_client.actions.items():
@@ -340,10 +341,13 @@ def run_listener(game_server, listener_client, render=True):
                     new_dict[key] = U.MovementTuple(action_type=value[0])
             penv.actions = new_dict
             actions_dict = new_dict
+        
         if listener_client.engagement_outcomes is not None:
             engagement_outcomes = listener_client.engagement_outcomes
-            penv.kothgame.engagement_outcomes = local_game.arbitrary_engagement_outcomes_from_server(engagement_outcomes=engagement_outcomes)[1]
-            local_game.engagement_outcomes = penv.kothgame.engagement_outcomes
+            eg_outs_tuple_list = local_game.arbitrary_engagement_outcomes_from_server(engagement_outcomes=engagement_outcomes)[0]
+            local_game.engagement_outcomes = eg_outs_tuple_list
+            penv.kothgame.engagement_outcomes = eg_outs_tuple_list
+            penv.actions = local_game.arbitrary_engagement_outcomes_from_server(engagement_outcomes=engagement_outcomes)[1]
         else:
             engagement_outcomes = None
             penv.kothgame.engagement_outcomes = None

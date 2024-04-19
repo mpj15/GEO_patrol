@@ -26,22 +26,22 @@ NUM_TOKENS_PER_PLAYER = {
 INIT_FUEL = {
     U.P1:{
         U.SEEKER:   100.0,
-        U.BLUDGER:  60.0,
+        U.BLUDGER:  100.0,
         },
     U.P2:{
         U.SEEKER:   100.0,
-        U.BLUDGER:  100.0,
+        U.BLUDGER:  60.0,
         }
     }
 
 INIT_AMMO = {
     U.P1:{
         U.SEEKER:   0,
-        U.BLUDGER:  4,
+        U.BLUDGER:  0,
         },
     U.P2:{
         U.SEEKER:   0,
-        U.BLUDGER:  0,
+        U.BLUDGER:  4,
         },
     }
 

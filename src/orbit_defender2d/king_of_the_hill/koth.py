@@ -499,7 +499,8 @@ class KOTHGame:
             engagement_outcomes: list of dicts with engagement outcomes from game server
             
         Returns:
-            tuple_engagement_outcomes: List of engagement outcome tuples
+            list_engagement_outcomes: List of engagement outcome tuples
+            dict_engagement_outcomes: Dict of engagement outcomes with attacker id as key
         '''
         list_engagement_outcomes = []
         dict_engagement_outcomes = {}
