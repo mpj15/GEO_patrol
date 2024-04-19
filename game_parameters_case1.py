@@ -15,8 +15,8 @@ else:
     raise ValueError("MIN_RING must be >= 1")
 
 ########### initial token placement and attributes ############
-INIT_BOARD_PATTERN_P1 = [(-2,0), (-1,1), (0,2), (1,1), (2,0)] # (relative azim, number of pieces)
-INIT_BOARD_PATTERN_P2 = [(-2,1), (-1,2), (0,2), (1,2), (2,1)] # (relative azim, number of pieces)
+INIT_BOARD_PATTERN_P1 = [(-2,1), (-1,2), (0,2), (1,2), (2,1)] # (relative azim, number of pieces) # P1 is Offense
+INIT_BOARD_PATTERN_P2 = [(-2,0), (-1,1), (0,2), (1,1), (2,0)] # (relative azim, number of pieces) # P2 is Defense
 
 NUM_TOKENS_PER_PLAYER = {
     U.P1: sum([a[1] for a in INIT_BOARD_PATTERN_P1])+1, #Get the number of tokens per player, plus 1 for the seeker
@@ -26,22 +26,22 @@ NUM_TOKENS_PER_PLAYER = {
 INIT_FUEL = {
     U.P1:{
         U.SEEKER:   100.0,
-        U.BLUDGER:  60.0,
+        U.BLUDGER:  100.0,
         },
     U.P2:{
         U.SEEKER:   100.0,
-        U.BLUDGER:  100.0,
+        U.BLUDGER:  60.0,
         }
     }
 
 INIT_AMMO = {
     U.P1:{
         U.SEEKER:   0,
-        U.BLUDGER:  4,
+        U.BLUDGER:  0,
         },
     U.P2:{
         U.SEEKER:   0,
-        U.BLUDGER:  0,
+        U.BLUDGER:  4,
         },
     }
 

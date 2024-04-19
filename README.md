@@ -25,7 +25,7 @@ pip install -r requirements.txt
 After installing and activating the environment, you can run the game with the following command:
 
 ```bash
-python od2d.py
+python run_geo_patrol.py
 ```
 
 Or, in Widows, you can run the powhershell script:

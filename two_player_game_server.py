@@ -6,32 +6,39 @@ import numpy as np
 import orbit_defender2d.utils.utils as U
 import copy
 import orbit_defender2d.king_of_the_hill.pettingzoo_env as PZE
-import game_parameters_case1 as DGP
 from orbit_defender2d.king_of_the_hill import koth
 from orbit_defender2d.king_of_the_hill import game_server as GS
 from orbit_defender2d.king_of_the_hill.examples.server_utils import *
+from geo_patrol_utils import log_game_final_to_csv
 
 from time import sleep
 
+########### Keep these up to date ############
+CSV_FILE_PATH = './logs/server_game_logs.csv'
+GAME_TYPE = 'human_vs_human'
+CASE_NUM = 1
+import game_parameters_case1 as GP
+#############################################
+
 # Game Parameters
 GAME_PARAMS = koth.KOTHGameInputArgs(
-    max_ring=DGP.MAX_RING,
-    min_ring=DGP.MIN_RING,
-    geo_ring=DGP.GEO_RING,
-    init_board_pattern_p1=DGP.INIT_BOARD_PATTERN_P1,
-    init_board_pattern_p2=DGP.INIT_BOARD_PATTERN_P2,
-    init_fuel=DGP.INIT_FUEL,
-    init_ammo=DGP.INIT_AMMO,
-    min_fuel=DGP.MIN_FUEL,
-    fuel_usage=DGP.FUEL_USAGE,
-    engage_probs=DGP.ENGAGE_PROBS,
-    illegal_action_score=DGP.ILLEGAL_ACT_SCORE,
-    in_goal_points=DGP.IN_GOAL_POINTS,
-    adj_goal_points=DGP.ADJ_GOAL_POINTS,
-    fuel_points_factor=DGP.FUEL_POINTS_FACTOR,
-    win_score=DGP.WIN_SCORE,
-    max_turns=DGP.MAX_TURNS,
-    fuel_points_factor_bludger=DGP.FUEL_POINTS_FACTOR_BLUDGER,
+    max_ring=GP.MAX_RING,
+    min_ring=GP.MIN_RING,
+    geo_ring=GP.GEO_RING,
+    init_board_pattern_p1=GP.INIT_BOARD_PATTERN_P1,
+    init_board_pattern_p2=GP.INIT_BOARD_PATTERN_P2,
+    init_fuel=GP.INIT_FUEL,
+    init_ammo=GP.INIT_AMMO,
+    min_fuel=GP.MIN_FUEL,
+    fuel_usage=GP.FUEL_USAGE,
+    engage_probs=GP.ENGAGE_PROBS,
+    illegal_action_score=GP.ILLEGAL_ACT_SCORE,
+    in_goal_points=GP.IN_GOAL_POINTS,
+    adj_goal_points=GP.ADJ_GOAL_POINTS,
+    fuel_points_factor=GP.FUEL_POINTS_FACTOR,
+    win_score=GP.WIN_SCORE,
+    max_turns=GP.MAX_TURNS,
+    fuel_points_factor_bludger=GP.FUEL_POINTS_FACTOR_BLUDGER,
     )
 
 class ListenerClient(object):
@@ -63,6 +70,7 @@ class ListenerClient(object):
         self.player_id = None
         self.game_state = None
         self.actions = None
+        self.engagement_outcomes = None
         self.player_registry = None
         self._lock = threading.Lock()
         self._stop = threading.Event()
@@ -313,7 +321,6 @@ def run_listener(game_server, listener_client, render=True):
     p2_alias = plr_reg[1][GS.PLAYER_ID]+": "+plr_reg[1][GS.PLAYER_ALIAS]
     print("Player 1: ", p1_alias)
     print("Player 2: ", p2_alias)
-    logfilename = './logs/game_log_'+p1_alias+'_vs_'+p2_alias
     logfile = koth.start_log_file('./logs/game_log_server', p1_alias=p1_alias, p2_alias=p2_alias)
 
     if render:
@@ -329,6 +336,7 @@ def run_listener(game_server, listener_client, render=True):
         local_game = penv.kothgame
         local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(tmp_game_state)
         penv.kothgame = local_game
+        
         if listener_client.actions is not None:
             new_dict = {}
             for key, value in listener_client.actions.items():
@@ -340,28 +348,34 @@ def run_listener(game_server, listener_client, render=True):
                     new_dict[key] = U.MovementTuple(action_type=value[0])
             penv.actions = new_dict
             actions_dict = new_dict
+        
         if listener_client.engagement_outcomes is not None:
             engagement_outcomes = listener_client.engagement_outcomes
-            penv.kothgame.engagement_outcomes = koth.KOTHGame.arbitrary_engagement_outcomes_from_server(engagement_outcomes)
-            local_game.engagement_outcomes = penv.kothgame.engagement_outcomes
+            eg_outs_tuple_list = local_game.arbitrary_engagement_outcomes_from_server(engagement_outcomes=engagement_outcomes)[0]
+            local_game.engagement_outcomes = eg_outs_tuple_list
+            penv.kothgame.engagement_outcomes = eg_outs_tuple_list
+            penv.actions = local_game.arbitrary_engagement_outcomes_from_server(engagement_outcomes=engagement_outcomes)[1]
         else:
             engagement_outcomes = None
             penv.kothgame.engagement_outcomes = None
 
         if tmp_game_state[GS.TURN_PHASE] != turn_phase:
-            koth.print_game_info(local_game)
-            if actions_dict is not None:
-                koth.print_actions(actions_dict)
-                koth.log_game_to_file(local_game, logfile,actions=actions_dict)
-                actions_dict = None
-            else:
-                koth.log_game_to_file(local_game, logfile)
+            #Log the info from the prior turn phase
+            local_game.game_state[U.TURN_PHASE] = turn_phase
+            if turn_phase == U.DRIFT:
+                local_game.game_state[U.TURN_COUNT] = tmp_game_state[GS.TURN_NUMBER] - 1
+            koth.print_game_info(game=local_game)
+            koth.print_actions(actions=actions_dict)
+            koth.log_game_to_file(game=local_game, logfile=logfile,actions=actions_dict)
+            actions_dict = None
             # if tmp_game_state[GS.TURN_PHASE] == U.DRIFT:
             #     if hasattr(listener_client, 'engagement_outcomes'):
             #         with open(logfile, 'a') as f:
             #             print_engagement_outcomes_list(listener_client.engagement_outcomes, file=f)
             #             f.close()
             turn_phase = tmp_game_state[GS.TURN_PHASE]
+            local_game.game_state[U.TURN_PHASE] = turn_phase
+            local_game.game_state[U.TURN_COUNT] = tmp_game_state[GS.TURN_NUMBER]
         
         if render:
             penv.render(mode='human')
@@ -369,6 +383,7 @@ def run_listener(game_server, listener_client, render=True):
         if tmp_game_state[GS.GAME_DONE] is True:
             koth.print_endgame_status(local_game)
             koth.log_game_to_file(local_game, logfile)
+            log_game_final_to_csv(CASE_NUM,GP,local_game,CSV_FILE_PATH,GAME_TYPE,p1_alias=p1_alias,p2_alias=p2_alias)
             break
         print("Waiting for game to finish")
         sleep(1)
@@ -384,6 +399,7 @@ def run_listener(game_server, listener_client, render=True):
     else:
         winner = 'draw'
 
+    
     if render:
         penv.render(mode='human')
         sleep(1)

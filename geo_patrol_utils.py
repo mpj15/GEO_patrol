@@ -1,31 +1,10 @@
-"""
-Client for the server to be used with command line input.
-This is so that a human can play against the AI using the pygame interface.
-
-Will need to copy the player client class from server_koth_game_rollout. 
-Use CLI input to get the player's move and format as a touple.
-Then use the player client class send_action_request method to send the action to the server. Should stay formatted as dict. Don't need the PZE flat representation.
-
-TODO: Add the renderer to this script so that this player can see the game seperately from the other player.
-
-TODO: Make the player client class a separate file that can be imported by both the server and the CLI client.
-
-"""
-
-#imports
-import numpy as np
+import os
+import datetime
 import orbit_defender2d.utils.utils as U
-import orbit_defender2d.king_of_the_hill.pettingzoo_env as PZE
-import game_parameters_case1 as DGP
 import orbit_defender2d.king_of_the_hill.game_server as GS
 from orbit_defender2d.king_of_the_hill import koth
-
-
 import zmq
 import threading
-import concurrent.futures
-from copy import deepcopy
-from orbit_defender2d.king_of_the_hill import koth
 from orbit_defender2d.king_of_the_hill.examples.server_utils import \
     assert_valid_game_state, print_game_info, print_engagement_outcomes_list
 from numpy.random import choice, rand, shuffle
@@ -37,27 +16,6 @@ PUB_PORT_NUM = 5556
 API_VER_NUM_2P = "v2022.07.26.0000.2p"
 
 ECHO_REQ_MSG_0 = {'context': 'echo', 'data': {'key0': 'value0'}}
-
-# Game Parameters
-GAME_PARAMS = koth.KOTHGameInputArgs(
-    max_ring=DGP.MAX_RING,
-    min_ring=DGP.MIN_RING,
-    geo_ring=DGP.GEO_RING,
-    init_board_pattern_p1=DGP.INIT_BOARD_PATTERN_P1,
-    init_board_pattern_p2=DGP.INIT_BOARD_PATTERN_P2,
-    init_fuel=DGP.INIT_FUEL,
-    init_ammo=DGP.INIT_AMMO,
-    min_fuel=DGP.MIN_FUEL,
-    fuel_usage=DGP.FUEL_USAGE,
-    engage_probs=DGP.ENGAGE_PROBS,
-    illegal_action_score=DGP.ILLEGAL_ACT_SCORE,
-    in_goal_points=DGP.IN_GOAL_POINTS,
-    adj_goal_points=DGP.ADJ_GOAL_POINTS,
-    fuel_points_factor=DGP.FUEL_POINTS_FACTOR,
-    win_score=DGP.WIN_SCORE,
-    max_turns=DGP.MAX_TURNS,
-    fuel_points_factor_bludger=DGP.FUEL_POINTS_FACTOR_BLUDGER,
-    )
 
 class PlayerClient(object):
     '''bundles REQ and SUB sockets in one object'''
@@ -87,6 +45,7 @@ class PlayerClient(object):
         self.alias = plr_alias
         self.player_id = None
         self.game_state = None
+        self.engagement_outcomes = None
         self._lock = threading.Lock()
         self._stop = threading.Event()
 
@@ -233,7 +192,6 @@ class PlayerClient(object):
             #plr_actions = [actions[tok[GS.PIECE_ID]] for tok in self.game_state[GS.TOKEN_STATES] if koth.parse_token_id(tok[GS.PIECE_ID])[0] == self.player_id]
             if context == U.MOVEMENT:
                 plr_actions = [{GS.PIECE_ID: tok[GS.PIECE_ID], GS.ACTION_TYPE: actions[tok[GS.PIECE_ID]][0]} for tok in self.game_state[GS.TOKEN_STATES] if koth.parse_token_id(tok[GS.PIECE_ID])[0] == self.player_id]
-                print(plr_actions)
                 req_msg[GS.CONTEXT] = GS.MOVE_PHASE
                 req_msg[GS.DATA][GS.KIND] = GS.MOVE_PHASE_REQ
                 req_msg[GS.DATA][GS.MOVEMENT_SELECTIONS] = plr_actions
@@ -320,124 +278,34 @@ class PlayerClient(object):
                 # no messages waiting to be processed
                 pass
 
-def run_CLI_client():
-    #This client will NOT create the game server, the script that generates the AI agent will do that.
-    #TODO: eventaully create a seperate script to make the game server, and then run two scripts, one for each agent that connects
-    #NOTE: This script creates the 'beta' client and the other script will create the 'alpha' client.
-
-    print("Creating player client...")
-    alias_valid = False
-    while not alias_valid:
-        alias = input("Enter player alias: ")
-        #Make sure that alias is a string <10 characters long and is not empty
-        if isinstance(alias, str) and len(alias) <= 10 and len(alias) > 0:
-            alias_valid = True
-        else:
-            print("Invalid alias. Alias must be a string <10 characters long and not empty.")
-
-    # alpha_client = context.socket(zmq.REQ)
-    # alpha_client.connect("tcp://localhost:{}".format(ROUTER_PORT_NUM))
-    plr_client = PlayerClient(
-        #router_addr="tcp://localhost:{}".format(ROUTER_PORT_NUM),
-        #pub_addr="tcp://localhost:{}".format(PUB_PORT_NUM),
-        router_addr="tcp://10.47.7.76:{}".format(ROUTER_PORT_NUM),
-        pub_addr="tcp://10.47.7.76:{}".format(PUB_PORT_NUM),
-        plr_alias=alias
-    )
-
-    # register clients as players in order, with random time between the two
-    print("Registering client with alias {}...".format(plr_client.alias))
-    plr_client.register_player_req()
-    sleep(rand())
-
-    #Send game reset request
-    plr_client.game_reset_req()
-
-    #Get game state from server
-    cur_game_state = plr_client.game_state
-
-    #Wait for the other player to connect, if necessary
-    #If the other player is not connected, game state will be None
-    while cur_game_state is None:
-        print("Waiting on other player to connect")
-        cur_game_state = plr_client.game_state
-        sleep(1)
+def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_alias=None, p2_alias=None):
+    '''log final game state and engagement outcomes to csv file
+        Note: this assumes a kothgame object, not a game server game state'''
     
-    print("\n<==== GAME INITILIZATION ====>")
-    print_game_info(game_state=cur_game_state)
+    #Create the row to write to the csv file, with the following columns:
+    #- Case number
+    #- type of game
+    #- P1 Alias
+    #- P2 Alias
+    #- Player1 Score
+    #- Player2 Score
+    #- Number of Turns
+    #- Score Difference
+    #- Termination Condition1, P1 HVA Fuel
+    #- Termination Condition2, P2 HVA Fuel
+    #- Termination Condition3, P1 Score
+    #- Termination Condition4, P2 Score
+    #- Termination Condition5, Max Turns
+    #- Date and Time
 
-    #Create local kothgame object and sync with the game server
-    # create and reset pettingzoo env
-    penv = PZE.parallel_env(game_params=GAME_PARAMS)
-    
-    # Start the rendered pygame window
-    penv.render(mode="human")
-
-    print("Player Alias: {}".format(plr_client.alias))
-    print("Player ID: {}".format(plr_client.player_id))
-    print("Player UUID: {}".format(plr_client.player_uuid))
-
-
-    local_game = koth.KOTHGame(**GAME_PARAMS._asdict()) 
-
-    logfile = koth.start_log_file('./logs/game_log_server_client')
-
-    while not cur_game_state[GS.GAME_DONE]:
-
-        print("\n<==== Turn: {} | Phase: {} ====>".format(cur_game_state[GS.TURN_NUMBER], cur_game_state[GS.TURN_PHASE]))
-
-        turnphase = cur_game_state[GS.TURN_PHASE]
-        
-        if cur_game_state[GS.TURN_PHASE] == U.DRIFT:
-            #send drift phase action request from penv client
-            plr_client.send_action_req(context=cur_game_state[GS.TURN_PHASE], actions=[])
-
-        else: #Game state is not DRIFT. Need to get new actions and send to server
-            #update the local_game with the new game state from the server
-            local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
-
-            #actions_dict = local_game.get_input_actions(plr_client.player_id)
-            #Get the actions from the player
-            acts_received = False
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                t = executor.submit(local_game.get_input_actions, plr_client.player_id)
-   
-                while not acts_received:
-                    if t.done():
-                        acts_received = True
-                        actions_dict = t.result()
-                    sleep(3)
-                    penv.render(mode="human")
-
-            #Send the actions to the game server
-            plr_client.send_action_req(context=cur_game_state[GS.TURN_PHASE], actions=actions_dict)
-
-
-        # wait for game state to advance
-        while cur_game_state[GS.TURN_PHASE] == turnphase and not cur_game_state[GS.GAME_DONE]:
-            sleep(1)
-            print('waiting for turn phase {} to advance'.format(cur_game_state[GS.TURN_PHASE]))
-            cur_game_state = plr_client.game_state
-
-        #update the local_game with the new game state from the server and update the render
-        local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
-        penv.kothgame = local_game
-        if actions_dict is not None:
-            koth.print_actions(actions_dict)
-            actions_dict = None
-        koth.log_game_to_file(local_game, logfile=logfile, actions=actions_dict)
-        penv.render(mode="human")
-
-        #check if plr_client has attribute engagement_outcomes
-        if plr_client.engagement_outcomes is not None:
-            print_engagement_outcomes_list(plr_client.engagement_outcomes, file=logfile)
-
-    print("Stopping {} ({}) client thread...".format(plr_client.alias, plr_client.player_id))
-    plr_client.stop()
+    if p1_alias is None:
+        p1_alias = U.P1
+    if p2_alias is None:
+        p2_alias = U.P2
 
     winner = None
-    alpha_score =local_game.game_state[U.P1][U.SCORE]
-    beta_score = local_game.game_state[U.P2][U.SCORE]
+    alpha_score =game.game_state[U.P1][U.SCORE]
+    beta_score = game.game_state[U.P2][U.SCORE]
     if alpha_score > beta_score:
         winner = U.P1
     elif beta_score > alpha_score:
@@ -445,39 +313,52 @@ def run_CLI_client():
     else:
         winner = 'draw'
 
-    #Show end of game info
-    GS.print_endgame_status(cur_game_state)
+    num_turns = game.game_state[U.TURN_COUNT]
 
-    if cur_game_state[GS.TOKEN_STATES][0]['fuel'] <= DGP.MIN_FUEL:
-        term_cond = "alpha out of fuel"
-    elif cur_game_state[GS.TOKEN_STATES][1]['fuel'] <= DGP.MIN_FUEL:
-        term_cond = "beta out of fuel"
-    elif cur_game_state[GS.SCORE_ALPHA] >= DGP.WIN_SCORE[U.P1]:
-        term_cond = "alpha reached Win Score"
-    elif cur_game_state[GS.SCORE_BETA]  >= DGP.WIN_SCORE[U.P2]:
-        term_cond = "beta reached Win Score"
-    elif cur_game_state[GS.TURN_NUMBER]  >= DGP.MAX_TURNS:
-        term_cond = "max turns reached" 
-    else:
-        term_cond = "unknown"
-    print("Termination condition: {}".format(term_cond))
-
-    penv.draw_win(winner)
-
-    #Ask user to press spacebar to end the game and close the pygame window
-    select_valid = 0
-    while not select_valid:
-        selection = input("Press spacebar and then return to end game: ")
-        if selection == " ":
-            select_valid = 1
-        else:
-            print("Invalid selection. Please press spacebar")
-
-    penv.close()
+    score_diff = alpha_score - beta_score
     
-    return
+    cur_game_state = game.game_state
+    tc1 = 0
+    tc2 = 0
+    tc3 = 0
+    tc4 = 0
+    tc5 = 0
+    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= game_params.MIN_FUEL:
+        tc1 = 1
+    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= game_params.MIN_FUEL:
+        tc2 = 1
+    if cur_game_state[U.P1][U.SCORE] >= game_params.WIN_SCORE[U.P1]:
+        tc3 = 1
+    if cur_game_state[U.P2][U.SCORE]  >= game_params.WIN_SCORE[U.P2]:
+        tc4 = 1
+    if cur_game_state[U.TURN_COUNT]  >= game_params.MAX_TURNS:
+        tc5 = 1
 
+    #Get date and time
+    now = datetime.datetime.now()
 
+    #creat the row, row_out
+    row_out = [case_num, game_type, p1_alias, p2_alias, alpha_score, beta_score, num_turns, score_diff, tc1, tc2, tc3, tc4, tc5, now]
 
-if __name__ == "__main__":
-    run_CLI_client()
+    #Check if the file exists, if not, create it and write the header row
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            f.write('Case Number, Game Type, P1 Alias, P2 Alias, P1 Score, P2 Score, Number of Turns, Score Difference, P1 HVA OOF, P2 HVA OOF, P1 WinScore, P2 WinScore, MaxTurns, Date and Time\n')
+            #Then write row_out to the file
+            f.write(','.join([str(x) for x in row_out]) + '\n')
+            #Close the file
+            f.close()
+    else: #Just append row_out to the file
+        with open(file_path, 'a') as f:
+            f.write(','.join([str(x) for x in row_out]) + '\n')
+            f.close()
+    
+
+def get_engagement_dict_from_list(engagement_list):
+    """
+    Turns a list of engagement tuples or engagement outcome tuples into a list of dicts with the key as the token name and the tuple as the value
+    """
+    engagement_dict = {}
+    for eng in engagement_list:
+        engagement_dict[eng.attacker] = eng
+    return engagement_dict
