@@ -40,7 +40,7 @@ def run():
             case_num = get_case_num()
             model_path_alpha = MODEL_PATH_ALPHA
             model_path_beta =  MODEL_PATH_BETA
-            gpg.ai_v_ai(model_path_alpha, model_path_beta, case_num=case_num)
+            gpg.ai_v_ai_game_mode(model_path_alpha, model_path_beta, case_num=case_num)
             print("Game finished.")
             time.sleep(1)
         elif gameMode == 2:
@@ -50,17 +50,17 @@ def run():
             case_num = get_case_num()
             if case_num == 1:
                 # Run case 1
-                gpg.run_game_humanB_v_aiA(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=1)
+                gpg.human_v_ai_game_mode(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=1)
                 print("Game finished.")
                 time.sleep(1)
             elif case_num == 2:
                 # Run case 2
-                gpg.run_game_humanB_v_aiA(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=2)
+                gpg.human_v_ai_game_mode(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=2)
                 print("Game finished.")
                 time.sleep(1)
             elif case_num == 3:
                 # Run case 3
-                gpg.run_game_humanB_v_aiA(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=3)
+                gpg.human_v_ai_game_mode(model_path_alpha= model_path_alpha,model_path_beta=None, case_num=3)
                 print("Game finished.")
                 time.sleep(1)
             else:

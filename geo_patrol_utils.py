@@ -1,3 +1,5 @@
+import os
+import datetime
 import orbit_defender2d.utils.utils as U
 import orbit_defender2d.king_of_the_hill.game_server as GS
 from orbit_defender2d.king_of_the_hill import koth
@@ -276,9 +278,81 @@ class PlayerClient(object):
                 # no messages waiting to be processed
                 pass
 
-def log_game_final_to_csv(game_state, engagement_outcomes, plr_alias):
-    '''log final game state and engagement outcomes to csv file'''
-    pass
+def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_alias=None, p2_alias=None):
+    '''log final game state and engagement outcomes to csv file
+        Note: this assumes a kothgame object, not a game server game state'''
+    
+    #Create the row to write to the csv file, with the following columns:
+    #- Case number
+    #- type of game
+    #- P1 Alias
+    #- P2 Alias
+    #- Player1 Score
+    #- Player2 Score
+    #- Number of Turns
+    #- Score Difference
+    #- Termination Condition1, P1 HVA Fuel
+    #- Termination Condition2, P2 HVA Fuel
+    #- Termination Condition3, P1 Score
+    #- Termination Condition4, P2 Score
+    #- Termination Condition5, Max Turns
+    #- Date and Time
+
+    if p1_alias is None:
+        p1_alias = U.P1
+    if p2_alias is None:
+        p2_alias = U.P2
+
+    winner = None
+    alpha_score =game.game_state[U.P1][U.SCORE]
+    beta_score = game.game_state[U.P2][U.SCORE]
+    if alpha_score > beta_score:
+        winner = U.P1
+    elif beta_score > alpha_score:
+        winner = U.P2
+    else:
+        winner = 'draw'
+
+    num_turns = game.game_state[U.TURN_COUNT]
+
+    score_diff = alpha_score - beta_score
+    
+    cur_game_state = game.game_state
+    tc1 = 0
+    tc2 = 0
+    tc3 = 0
+    tc4 = 0
+    tc5 = 0
+    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= game_params.MIN_FUEL:
+        tc1 = 1
+    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= game_params.MIN_FUEL:
+        tc2 = 1
+    if cur_game_state[U.P1][U.SCORE] >= game_params.WIN_SCORE[U.P1]:
+        tc3 = 1
+    if cur_game_state[U.P2][U.SCORE]  >= game_params.WIN_SCORE[U.P2]:
+        tc4 = 1
+    if cur_game_state[U.TURN_COUNT]  >= game_params.MAX_TURNS:
+        tc5 = 1
+
+    #Get date and time
+    now = datetime.datetime.now()
+
+    #creat the row, row_out
+    row_out = [case_num, game_type, p1_alias, p2_alias, alpha_score, beta_score, num_turns, score_diff, tc1, tc2, tc3, tc4, tc5, now]
+
+    #Check if the file exists, if not, create it and write the header row
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            f.write('Case Number, Player1 Score, Player2 Score, Number of Turns, Score Difference, Termination Condition1, Termination Condition2, Termination Condition3, Termination Condition4, Termination Condition5, Date and Time\n')
+            #Then write row_out to the file
+            f.write(','.join([str(x) for x in row_out]) + '\n')
+            #Close the file
+            f.close()
+    else: #Just append row_out to the file
+        with open(file_path, 'a') as f:
+            f.write(','.join([str(x) for x in row_out]) + '\n')
+            f.close()
+    
 
 def get_engagement_dict_from_list(engagement_list):
     """

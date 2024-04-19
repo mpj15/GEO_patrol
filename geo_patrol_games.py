@@ -11,13 +11,15 @@ from time import sleep
 import concurrent.futures
 from orbit_defender2d.king_of_the_hill.examples.server_utils import print_game_info
 
-from geo_patrol_utils import PlayerClient, get_engagement_dict_from_list, log_game_final_to_csv
+from geo_patrol_utils import PlayerClient, get_engagement_dict_from_list, log_game_final_to_csv, ROUTER_PORT_NUM, PUB_PORT_NUM
 import game_parameters_default as DGP
 import game_parameters_case1 as GP_1
 import game_parameters_case2 as GP_2
 import game_parameters_case3 as GP_3
 
-def ai_v_ai(model_path_alpha, model_path_beta, case_num):
+CSV_FILE_PATH = './logs/logfile.csv'
+
+def ai_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
     if case_num == 1:
         GP = GP_1
     elif case_num == 2:
@@ -28,7 +30,7 @@ def ai_v_ai(model_path_alpha, model_path_beta, case_num):
         GP = DGP
     run_game_ai_vs_ai(model_path_alpha,model_path_beta, GP)
 
-def human_v_ai(model_path_alpha, model_path_beta, case_num):
+def human_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
     if case_num == 1:
         GP = GP_1
     elif case_num == 2:
@@ -65,7 +67,12 @@ def run_server_client_game_mode(gs_host_addr,case_num):
         GP = DGP
     run_server_client_game(gs_host_addr, GP)
 
-def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP):
+
+
+def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP, case_num):
+    
+    game_type = "ai_v_ai"
+
     GAME_PARAMS = koth.KOTHGameInputArgs(
         max_ring=GP.MAX_RING,
         min_ring=GP.MIN_RING,
@@ -194,6 +201,7 @@ def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
+    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P1+":AI")
 
     cur_game_state = penv.kothgame.game_state
     if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
@@ -221,8 +229,9 @@ def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP):
             print("Invalid selection. Please press spacebar")
     return
 
-def run_game_humanB_v_aiA(model_path_alpha, GP):
+def run_game_humanB_v_aiA(model_path_alpha, GP, case_num):
     #Get the user's name:
+    game_type = "ai_v_human"
     alias_valid = False
     while not alias_valid:
         alias = input("Enter player name: ")
@@ -366,6 +375,7 @@ def run_game_humanB_v_aiA(model_path_alpha, GP):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
+    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":"+alias)
 
     cur_game_state = penv.kothgame.game_state
     if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
@@ -393,7 +403,8 @@ def run_game_humanB_v_aiA(model_path_alpha, GP):
             print("Invalid selection. Please press spacebar")
     return
 
-def run_game_humanA_v_aiB(model_path_beta, GP):
+def run_game_humanA_v_aiB(model_path_beta, GP, case_num):
+    game_type = "human_v_ai"
     #Get the user's name:
     alias_valid = False
     while not alias_valid:
@@ -430,8 +441,6 @@ def run_game_humanA_v_aiB(model_path_beta, GP):
     # create and reset pettingzoo env
     penv = PZE.parallel_env(game_params=GAME_PARAMS, training_randomize=False, plr_aliases=[alias,"AI"])
     obs = penv.reset()
-
-    
 
     # Render pygame window
     penv.render(mode="human")
@@ -538,6 +547,7 @@ def run_game_humanA_v_aiB(model_path_beta, GP):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
+    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":"+alias, p2_alias=U.P2+":AI")
 
     cur_game_state = penv.kothgame.game_state
     if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
@@ -565,11 +575,30 @@ def run_game_humanA_v_aiB(model_path_beta, GP):
             print("Invalid selection. Please press spacebar")
     return
 
-def run_server_client_game(gs_host_addr, GP):
+def run_server_client_game(gs_host_addr, GP, case_num):
     #This client will NOT create the game server, the script that generates the AI agent will do that.
     #TODO: eventaully create a seperate script to make the game server, and then run two scripts, one for each agent that connects
     #NOTE: This script creates the 'beta' client and the other script will create the 'alpha' client.
-
+    game_type = "server_client"
+    GAME_PARAMS = koth.KOTHGameInputArgs(
+        max_ring=GP.MAX_RING,
+        min_ring=GP.MIN_RING,
+        geo_ring=GP.GEO_RING,
+        init_board_pattern_p1=GP.INIT_BOARD_PATTERN_P1,
+        init_board_pattern_p2=GP.INIT_BOARD_PATTERN_P2,
+        init_fuel=GP.INIT_FUEL,
+        init_ammo=GP.INIT_AMMO,
+        min_fuel=GP.MIN_FUEL,
+        fuel_usage=GP.FUEL_USAGE,
+        engage_probs=GP.ENGAGE_PROBS,
+        illegal_action_score=GP.ILLEGAL_ACT_SCORE,
+        in_goal_points=GP.IN_GOAL_POINTS,
+        adj_goal_points=GP.ADJ_GOAL_POINTS,
+        fuel_points_factor=GP.FUEL_POINTS_FACTOR,
+        win_score=GP.WIN_SCORE,
+        max_turns=GP.MAX_TURNS,
+        fuel_points_factor_bludger=GP.FUEL_POINTS_FACTOR_BLUDGER,
+        )
     print("Creating player client...")
     alias_valid = False
     while not alias_valid:
@@ -585,8 +614,8 @@ def run_server_client_game(gs_host_addr, GP):
     plr_client = PlayerClient(
         #router_addr="tcp://localhost:{}".format(ROUTER_PORT_NUM),
         #pub_addr="tcp://localhost:{}".format(PUB_PORT_NUM),
-        router_addr=gs_host_addr+":{}".format(ROUTER_PORT_NUM),
-        pub_addr=gs_host_addr+":{}".format(PUB_PORT_NUM),
+        router_addr="tcp://"+gs_host_addr+":{}".format(ROUTER_PORT_NUM),
+        pub_addr="tcp://"+gs_host_addr+":{}".format(PUB_PORT_NUM),
         plr_alias=alias
     )
 
@@ -613,7 +642,7 @@ def run_server_client_game(gs_host_addr, GP):
 
     #Create local kothgame object and sync with the game server
     # create and reset pettingzoo env
-    penv = PZE.parallel_env(game_params=GP, training_randomize=False)
+    penv = PZE.parallel_env(game_params=GAME_PARAMS, training_randomize=False)
     
     # Start the rendered pygame window
     penv.render(mode="human")
@@ -623,9 +652,10 @@ def run_server_client_game(gs_host_addr, GP):
     print("Player UUID: {}".format(plr_client.player_uuid))
 
 
-    local_game = koth.KOTHGame(**GP._asdict()) 
+    local_game = koth.KOTHGame(**GAME_PARAMS._asdict()) 
 
     logfile = koth.start_log_file('./logs/game_log_server_client')
+    csv_logfile = './logs/logfile.csv'
 
     while not cur_game_state[GS.GAME_DONE]:
 
@@ -671,6 +701,16 @@ def run_server_client_game(gs_host_addr, GP):
             local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = local_game.arbitrary_game_state_from_server(cur_game_state)
             koth.print_endgame_status(local_game)
             koth.log_game_to_file(local_game, logfile)
+            if plr_client.player_id == U.P1:
+                p1_alias = U.P1+":"+plr_client.alias
+                p2_alias = U.P2
+            elif plr_client.player_id == U.P2:
+                p1_alias = U.P1
+                p2_alias = U.P2+":"+plr_client.alias
+            else:
+                p1_alias = U.P1
+                p2_alias = U.P2
+            log_game_final_to_csv(case_num, GP, local_game, CSV_FILE_PATH, game_type, p1_alias, p2_alias)
             break
 
         #update the local_game with the new game state from the server and update the render
