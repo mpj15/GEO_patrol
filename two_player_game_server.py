@@ -6,12 +6,19 @@ import numpy as np
 import orbit_defender2d.utils.utils as U
 import copy
 import orbit_defender2d.king_of_the_hill.pettingzoo_env as PZE
-import game_parameters_case1 as DGP
 from orbit_defender2d.king_of_the_hill import koth
 from orbit_defender2d.king_of_the_hill import game_server as GS
 from orbit_defender2d.king_of_the_hill.examples.server_utils import *
+from geo_patrol_utils import log_game_final_to_csv
 
 from time import sleep
+
+########### Keep these up to date ############
+CSV_FILE_PATH = './logs/server_game_logs.csv'
+GAME_TYPE = 'human_vs_human'
+CASE_NUM = 1
+import game_parameters_case1 as DGP
+#############################################
 
 # Game Parameters
 GAME_PARAMS = koth.KOTHGameInputArgs(
@@ -376,6 +383,7 @@ def run_listener(game_server, listener_client, render=True):
         if tmp_game_state[GS.GAME_DONE] is True:
             koth.print_endgame_status(local_game)
             koth.log_game_to_file(local_game, logfile)
+            log_game_final_to_csv(CASE_NUM,GAME_PARAMS,local_game,CSV_FILE_PATH,GAME_TYPE,p1_alias=p1_alias,p2_alias=p2_alias)
             break
         print("Waiting for game to finish")
         sleep(1)
@@ -391,6 +399,7 @@ def run_listener(game_server, listener_client, render=True):
     else:
         winner = 'draw'
 
+    
     if render:
         penv.render(mode='human')
         sleep(1)
