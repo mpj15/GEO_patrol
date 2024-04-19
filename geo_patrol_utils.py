@@ -278,7 +278,7 @@ class PlayerClient(object):
                 # no messages waiting to be processed
                 pass
 
-def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_alias=None, p2_alias=None):
+def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_alias=None, p2_alias=None, associated_logfile=None):
     '''log final game state and engagement outcomes to csv file
         Note: this assumes a kothgame object, not a game server game state'''
     
@@ -335,15 +335,19 @@ def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_
         tc5 = 1
 
     #Get date and time
-    now = datetime.datetime.now()
-
+    if associated_logfile is None:
+        now = datetime.datetime.now()
+    else:
+        #get the part of the associated_logfile string that is after the last '/'
+        now = associated_logfile[associated_logfile.rfind('/')+1:]
+        
     #creat the row, row_out
     row_out = [case_num, game_type, p1_alias, p2_alias, alpha_score, beta_score, num_turns, score_diff, tc1, tc2, tc3, tc4, tc5, now]
 
     #Check if the file exists, if not, create it and write the header row
     if not os.path.exists(file_path):
         with open(file_path, 'w') as f:
-            f.write('Case Number, Game Type, P1 Alias, P2 Alias, P1 Score, P2 Score, Number of Turns, Score Difference, P1 HVA OOF, P2 HVA OOF, P1 WinScore, P2 WinScore, MaxTurns, Date and Time\n')
+            f.write('Case Number, Game Type, P1 Alias, P2 Alias, P1 Score, P2 Score, Number of Turns, Score Difference, P1 HVA OOF, P2 HVA OOF, P1 WinScore, P2 WinScore, MaxTurns, Associated Log File\n')
             #Then write row_out to the file
             f.write(','.join([str(x) for x in row_out]) + '\n')
             #Close the file

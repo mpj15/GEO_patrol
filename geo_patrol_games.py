@@ -201,7 +201,7 @@ def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP, case_num):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
-    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":AI")
+    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":AI", associated_logfile=logfile)
 
     cur_game_state = penv.kothgame.game_state
     if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
@@ -375,7 +375,7 @@ def run_game_humanB_v_aiA(model_path_alpha, GP, case_num):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
-    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":"+alias)
+    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":"+alias, associated_logfile=logfile)
 
     cur_game_state = penv.kothgame.game_state
     if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
@@ -547,7 +547,7 @@ def run_game_humanA_v_aiB(model_path_beta, GP, case_num):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
-    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":"+alias, p2_alias=U.P2+":AI")
+    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":"+alias, p2_alias=U.P2+":AI", associated_logfile=logfile)
 
     cur_game_state = penv.kothgame.game_state
     if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
@@ -710,7 +710,7 @@ def run_server_client_game(gs_host_addr, GP, case_num):
             else:
                 p1_alias = U.P1
                 p2_alias = U.P2
-            log_game_final_to_csv(case_num, GP, local_game, CSV_FILE_PATH, game_type, p1_alias, p2_alias)
+            log_game_final_to_csv(case_num, GP, local_game, CSV_FILE_PATH, game_type, p1_alias, p2_alias, associated_logfile=logfile)
             break
 
         #update the local_game with the new game state from the server and update the render
