@@ -17,28 +17,28 @@ from time import sleep
 CSV_FILE_PATH = './logs/server_game_logs.csv'
 GAME_TYPE = 'human_vs_human'
 CASE_NUM = 1
-import game_parameters_case1 as DGP
+import game_parameters_case1 as GP
 #############################################
 
 # Game Parameters
 GAME_PARAMS = koth.KOTHGameInputArgs(
-    max_ring=DGP.MAX_RING,
-    min_ring=DGP.MIN_RING,
-    geo_ring=DGP.GEO_RING,
-    init_board_pattern_p1=DGP.INIT_BOARD_PATTERN_P1,
-    init_board_pattern_p2=DGP.INIT_BOARD_PATTERN_P2,
-    init_fuel=DGP.INIT_FUEL,
-    init_ammo=DGP.INIT_AMMO,
-    min_fuel=DGP.MIN_FUEL,
-    fuel_usage=DGP.FUEL_USAGE,
-    engage_probs=DGP.ENGAGE_PROBS,
-    illegal_action_score=DGP.ILLEGAL_ACT_SCORE,
-    in_goal_points=DGP.IN_GOAL_POINTS,
-    adj_goal_points=DGP.ADJ_GOAL_POINTS,
-    fuel_points_factor=DGP.FUEL_POINTS_FACTOR,
-    win_score=DGP.WIN_SCORE,
-    max_turns=DGP.MAX_TURNS,
-    fuel_points_factor_bludger=DGP.FUEL_POINTS_FACTOR_BLUDGER,
+    max_ring=GP.MAX_RING,
+    min_ring=GP.MIN_RING,
+    geo_ring=GP.GEO_RING,
+    init_board_pattern_p1=GP.INIT_BOARD_PATTERN_P1,
+    init_board_pattern_p2=GP.INIT_BOARD_PATTERN_P2,
+    init_fuel=GP.INIT_FUEL,
+    init_ammo=GP.INIT_AMMO,
+    min_fuel=GP.MIN_FUEL,
+    fuel_usage=GP.FUEL_USAGE,
+    engage_probs=GP.ENGAGE_PROBS,
+    illegal_action_score=GP.ILLEGAL_ACT_SCORE,
+    in_goal_points=GP.IN_GOAL_POINTS,
+    adj_goal_points=GP.ADJ_GOAL_POINTS,
+    fuel_points_factor=GP.FUEL_POINTS_FACTOR,
+    win_score=GP.WIN_SCORE,
+    max_turns=GP.MAX_TURNS,
+    fuel_points_factor_bludger=GP.FUEL_POINTS_FACTOR_BLUDGER,
     )
 
 class ListenerClient(object):
@@ -383,7 +383,7 @@ def run_listener(game_server, listener_client, render=True):
         if tmp_game_state[GS.GAME_DONE] is True:
             koth.print_endgame_status(local_game)
             koth.log_game_to_file(local_game, logfile)
-            log_game_final_to_csv(CASE_NUM,GAME_PARAMS,local_game,CSV_FILE_PATH,GAME_TYPE,p1_alias=p1_alias,p2_alias=p2_alias)
+            log_game_final_to_csv(CASE_NUM,GP,local_game,CSV_FILE_PATH,GAME_TYPE,p1_alias=p1_alias,p2_alias=p2_alias)
             break
         print("Waiting for game to finish")
         sleep(1)
