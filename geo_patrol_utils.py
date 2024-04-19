@@ -280,7 +280,16 @@ class PlayerClient(object):
 
 def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_alias=None, p2_alias=None, associated_logfile=None):
     '''log final game state and engagement outcomes to csv file
-        Note: this assumes a kothgame object, not a game server game state'''
+       Inputs:
+            case_num : int, which game parameter file to load
+            game_params : KOTHGame input args object, a named tuple
+            game : KOTHGame object
+            file_path : str, path to csv logfile
+            game_type : str, type of game
+            p1_alias : str, player 1 alias
+            p2_alias : str, player 2 alias
+            associated_logfile : str, path to game log file
+       '''
     
     #Create the row to write to the csv file, with the following columns:
     #- Case number
@@ -323,15 +332,15 @@ def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_
     tc3 = 0
     tc4 = 0
     tc5 = 0
-    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= game_params.MIN_FUEL:
+    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= game_params.min_fuel:
         tc1 = 1
-    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= game_params.MIN_FUEL:
+    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= game_params.min_fuel:
         tc2 = 1
-    if cur_game_state[U.P1][U.SCORE] >= game_params.WIN_SCORE[U.P1]:
+    if cur_game_state[U.P1][U.SCORE] >= game_params.win_score[U.P1]:
         tc3 = 1
-    if cur_game_state[U.P2][U.SCORE]  >= game_params.WIN_SCORE[U.P2]:
+    if cur_game_state[U.P2][U.SCORE]  >= game_params.win_score[U.P2]:
         tc4 = 1
-    if cur_game_state[U.TURN_COUNT]  >= game_params.MAX_TURNS:
+    if cur_game_state[U.TURN_COUNT]  >= game_params.max_turns:
         tc5 = 1
 
     #Get date and time
@@ -340,14 +349,28 @@ def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_
     else:
         #get the part of the associated_logfile string that is after the last '/'
         now = associated_logfile[associated_logfile.rfind('/')+1:]
-        
+    
+    #Get the Design vector info for each player. Player1 is Y, player2 is X
+    n_tokens_X =sum([a[1] for a in game_params.init_board_pattern_p2])+1
+    ammo_X = game_params.init_ammo[U.P2][U.BLUDGER]
+    fuel_X = game_params.init_fuel[U.P2][U.BLUDGER]
+    engage_probs_shoot_X = game_params.engage_probs[U.P2][U.IN_SEC][U.SHOOT]
+
+    n_tokens_Y = sum([a[1] for a in game_params.init_board_pattern_p1])+1
+    ammo_Y = game_params.init_ammo[U.P1][U.BLUDGER]
+    fuel_Y = game_params.init_fuel[U.P1][U.BLUDGER]
+    engage_probs_collide_Y = game_params.engage_probs[U.P1][U.IN_SEC][U.COLLIDE]
+
     #creat the row, row_out
-    row_out = [case_num, game_type, p1_alias, p2_alias, alpha_score, beta_score, num_turns, score_diff, tc1, tc2, tc3, tc4, tc5, now]
+    row_out = [case_num, game_type, p1_alias, p2_alias, alpha_score, beta_score, num_turns, score_diff, tc1, tc2, tc3, tc4, tc5, now, \
+               n_tokens_X, ammo_X, fuel_X, engage_probs_shoot_X, n_tokens_Y, ammo_Y, fuel_Y, engage_probs_collide_Y]
 
     #Check if the file exists, if not, create it and write the header row
     if not os.path.exists(file_path):
         with open(file_path, 'w') as f:
-            f.write('Case Number, Game Type, P1 Alias, P2 Alias, P1 Score, P2 Score, Number of Turns, Score Difference, P1 HVA OOF, P2 HVA OOF, P1 WinScore, P2 WinScore, MaxTurns, Associated Log File\n')
+            f.write('Case_Number, Game_Type, P1_Alias, P2_Alias, P1_Score, P2_Score, Number_of_Turns, Score_Difference, P1_HVA_OOF, \
+                     P2_HVA_OOF, P1_WinScore, P2_WinScore, Max_Turns, Log_File, \
+                    n_tokens_X, ammo_X, fuel_X, engage_probs_shoot_X, n_tokens_Y, ammo_Y, fuel_Y, engage_probs_collide_Y\n')
             #Then write row_out to the file
             f.write(','.join([str(x) for x in row_out]) + '\n')
             #Close the file

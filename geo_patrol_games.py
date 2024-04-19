@@ -201,18 +201,18 @@ def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP, case_num):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
-    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":AI", associated_logfile=logfile)
+    log_game_final_to_csv(case_num, GAME_PARAMS,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":AI", associated_logfile=logfile)
 
     cur_game_state = penv.kothgame.game_state
-    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
+    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GAME_PARAMS.min_fuel:
         print(U.P1+" seeker out of fuel")
-    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
+    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= GAME_PARAMS.min_fuel:
         print(U.P2+" seeker out of fuel")
-    if cur_game_state[U.P1][U.SCORE] >= GP.WIN_SCORE[U.P1]:
+    if cur_game_state[U.P1][U.SCORE] >= GAME_PARAMS.win_score[U.P1]:
         print(U.P1+" reached Win Score")
-    if cur_game_state[U.P2][U.SCORE]  >= GP.WIN_SCORE[U.P2]:
+    if cur_game_state[U.P2][U.SCORE]  >= GAME_PARAMS.win_score[U.P2]:
         print(U.P2+" reached Win Score")
-    if cur_game_state[U.TURN_COUNT]  >= GP.MAX_TURNS:
+    if cur_game_state[U.TURN_COUNT]  >= GAME_PARAMS.max_turns:
         print("max turns reached")
         
     print("\n====GAME FINISHED====\nWinner: {}\nScore: {}|{}\n=====================\n".format(winner, alpha_score, beta_score))
@@ -375,18 +375,18 @@ def run_game_humanB_v_aiA(model_path_alpha, GP, case_num):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
-    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":"+alias, associated_logfile=logfile)
+    log_game_final_to_csv(case_num, GAME_PARAMS,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":"+alias, associated_logfile=logfile)
 
     cur_game_state = penv.kothgame.game_state
-    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
+    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GAME_PARAMS.min_fuel:
         print(U.P1+" seeker out of fuel")
-    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
+    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= GAME_PARAMS.min_fuel:
         print(U.P2+" seeker out of fuel")
-    if cur_game_state[U.P1][U.SCORE] >= GP.WIN_SCORE[U.P1]:
+    if cur_game_state[U.P1][U.SCORE] >= GAME_PARAMS.win_score[U.P1]:
         print(U.P1+" reached Win Score")
-    if cur_game_state[U.P2][U.SCORE]  >= GP.WIN_SCORE[U.P2]:
+    if cur_game_state[U.P2][U.SCORE]  >= GAME_PARAMS.win_score[U.P2]:
         print(U.P2+" reached Win Score")
-    if cur_game_state[U.TURN_COUNT]  >= GP.MAX_TURNS:
+    if cur_game_state[U.TURN_COUNT]  >= GAME_PARAMS.max_turns:
         print("max turns reached")
         
     print("\n====GAME FINISHED====\nWinner: {}\nScore: {}|{}\n=====================\n".format(winner, alpha_score, beta_score))
@@ -547,18 +547,18 @@ def run_game_humanA_v_aiB(model_path_beta, GP, case_num):
     #Print final engagement outcomes
     koth.print_engagement_outcomes(penv.kothgame.engagement_outcomes)
     koth.log_game_to_file(penv.kothgame, logfile=logfile, actions=actions)
-    log_game_final_to_csv(case_num, GP,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":"+alias, p2_alias=U.P2+":AI", associated_logfile=logfile)
+    log_game_final_to_csv(case_num, GAME_PARAMS,penv.kothgame, CSV_FILE_PATH, game_type, p1_alias=U.P1+":"+alias, p2_alias=U.P2+":AI", associated_logfile=logfile)
 
     cur_game_state = penv.kothgame.game_state
-    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
+    if cur_game_state[U.P1][U.TOKEN_STATES][0].satellite.fuel <= GAME_PARAMS.min_fuel:
         print(U.P1+" seeker out of fuel")
-    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= GP.MIN_FUEL:
+    if cur_game_state[U.P2][U.TOKEN_STATES][0].satellite.fuel <= GAME_PARAMS.min_fuel:
         print(U.P2+" seeker out of fuel")
-    if cur_game_state[U.P1][U.SCORE] >= GP.WIN_SCORE[U.P1]:
+    if cur_game_state[U.P1][U.SCORE] >= GAME_PARAMS.win_score[U.P1]:
         print(U.P1+" reached Win Score")
-    if cur_game_state[U.P2][U.SCORE]  >= GP.WIN_SCORE[U.P2]:
+    if cur_game_state[U.P2][U.SCORE]  >= GAME_PARAMS.win_score[U.P2]:
         print(U.P2+" reached Win Score")
-    if cur_game_state[U.TURN_COUNT]  >= GP.MAX_TURNS:
+    if cur_game_state[U.TURN_COUNT]  >= GAME_PARAMS.max_turns:
         print("max turns reached")
         
     print("\n====GAME FINISHED====\nWinner: {}\nScore: {}|{}\n=====================\n".format(winner, alpha_score, beta_score))
@@ -710,7 +710,7 @@ def run_server_client_game(gs_host_addr, GP, case_num):
             else:
                 p1_alias = U.P1
                 p2_alias = U.P2
-            log_game_final_to_csv(case_num, GP, local_game, CSV_FILE_PATH, game_type, p1_alias, p2_alias, associated_logfile=logfile)
+            log_game_final_to_csv(case_num, GAME_PARAMS, local_game, CSV_FILE_PATH, game_type, p1_alias, p2_alias, associated_logfile=logfile)
             break
 
         #update the local_game with the new game state from the server and update the render
@@ -750,15 +750,15 @@ def run_server_client_game(gs_host_addr, GP, case_num):
     #Show end of game info
     GS.print_endgame_status(cur_game_state)
 
-    if cur_game_state[GS.TOKEN_STATES][0]['fuel'] <= GP.MIN_FUEL:
+    if cur_game_state[GS.TOKEN_STATES][0]['fuel'] <= GAME_PARAMS.min_fuel:
         term_cond = "alpha out of fuel"
-    elif cur_game_state[GS.TOKEN_STATES][1]['fuel'] <= GP.MIN_FUEL:
+    elif cur_game_state[GS.TOKEN_STATES][1]['fuel'] <= GAME_PARAMS.min_fuel:
         term_cond = "beta out of fuel"
-    elif cur_game_state[GS.SCORE_ALPHA] >= GP.WIN_SCORE[U.P1]:
+    elif cur_game_state[GS.SCORE_ALPHA] >= GAME_PARAMS.win_score[U.P1]:
         term_cond = "alpha reached Win Score"
-    elif cur_game_state[GS.SCORE_BETA]  >= GP.WIN_SCORE[U.P2]:
+    elif cur_game_state[GS.SCORE_BETA]  >= GAME_PARAMS.win_score[U.P2]:
         term_cond = "beta reached Win Score"
-    elif cur_game_state[GS.TURN_NUMBER]  >= GP.MAX_TURNS:
+    elif cur_game_state[GS.TURN_NUMBER]  >= GAME_PARAMS.max_turns:
         term_cond = "max turns reached" 
     else:
         term_cond = "unknown"
