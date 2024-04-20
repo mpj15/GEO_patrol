@@ -229,6 +229,100 @@ def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP, case_num):
             print("Invalid selection. Please press spacebar")
     return
 
+
+def run_game_ai_vs_ai_no_render(model_path_alpha, model_path_beta, GP, case_num):
+    
+    game_type = "ai_v_ai"
+
+    GAME_PARAMS = koth.KOTHGameInputArgs(
+        max_ring=GP.MAX_RING,
+        min_ring=GP.MIN_RING,
+        geo_ring=GP.GEO_RING,
+        init_board_pattern_p1=GP.INIT_BOARD_PATTERN_P1,
+        init_board_pattern_p2=GP.INIT_BOARD_PATTERN_P2,
+        init_fuel=GP.INIT_FUEL,
+        init_ammo=GP.INIT_AMMO,
+        min_fuel=GP.MIN_FUEL,
+        fuel_usage=GP.FUEL_USAGE,
+        engage_probs=GP.ENGAGE_PROBS,
+        illegal_action_score=GP.ILLEGAL_ACT_SCORE,
+        in_goal_points=GP.IN_GOAL_POINTS,
+        adj_goal_points=GP.ADJ_GOAL_POINTS,
+        fuel_points_factor=GP.FUEL_POINTS_FACTOR,
+        win_score=GP.WIN_SCORE,
+        max_turns=GP.MAX_TURNS,
+        fuel_points_factor_bludger=GP.FUEL_POINTS_FACTOR_BLUDGER,
+        )
+    # create and reset pettingzoo env
+    penv = PZE.parallel_env(game_params=GAME_PARAMS, training_randomize=False, plr_aliases=None)
+    obs = penv.reset()
+    
+    model_alpha = torch.jit.load(model_path_alpha)
+    model_beta = torch.jit.load(model_path_beta)
+    model_alpha.eval()
+    model_beta.eval()
+
+    # iterate through game with valid random actions
+    while True:
+
+        #Get actions from loaded policy to compare with actions from ray policy
+        new_obs_tensor_alpha = torch.tensor(obs[U.P1]['observation'], dtype=torch.float32)
+        new_obs_tensor_beta = torch.tensor(obs[U.P2]['observation'], dtype=torch.float32)
+
+        #Get Action masks
+        new_obs_tensor_am_alpha = torch.tensor(obs[U.P1]['action_mask'], dtype=torch.float32)
+        new_obs_tensor_am_alpha = new_obs_tensor_am_alpha.reshape(-1,)
+        new_obs_tensor_am_beta = torch.tensor(obs[U.P2]['action_mask'], dtype=torch.float32)
+        new_obs_tensor_am_beta = new_obs_tensor_am_beta.reshape(-1,)
+        
+        #Concatenate the action mask and observation tensors
+        new_obs_dict_alpha = {'obs':torch.cat((new_obs_tensor_am_alpha,new_obs_tensor_alpha),dim=0).unsqueeze(0)}
+        new_obs_dict_beta = {'obs':torch.cat((new_obs_tensor_am_beta,new_obs_tensor_beta),dim=0).unsqueeze(0)}
+
+        #Get the actions from the loaded policy
+        acts_alpha = model_alpha(new_obs_dict_alpha, [torch.tensor([0.0], dtype=torch.float32)], torch.tensor([0], dtype=torch.int64))
+        acts_beta = model_beta(new_obs_dict_beta, [torch.tensor([0.0], dtype=torch.float32)], torch.tensor([0], dtype=torch.int64))      
+    
+        #Format the acts_model as a gym spaces touple which is the same as the action space tuple defined in 
+        acts_alpha_reshaped = acts_alpha[0].reshape(11,38)
+        acts_alpha_list = torch.argmax(acts_alpha_reshaped, dim=1).tolist()
+
+        acts_beta_reshaped = acts_beta[0].reshape(11,38)
+        acts_beta_list = torch.argmax(acts_beta_reshaped, dim=1).tolist()
+
+        acts_alpha_tuple = tuple(acts_alpha_list)
+        acts_beta_tuple = tuple(acts_beta_list)
+
+        #Decode the actions from the model into the action dicts that can be used by koth
+        actions_alpha_dict = penv.decode_discrete_player_action(U.P1,acts_alpha_tuple)
+        actions_beta_dict = penv.decode_discrete_player_action(U.P2,acts_beta_tuple)
+
+        actions = {}
+        actions.update(actions_alpha_dict)
+        actions.update(actions_beta_dict)
+        penv.actions = actions #Add actions to the penv sot that they can be rendered
+
+        # encode actions into flat gym space
+        encoded_actions = penv.encode_all_discrete_actions(actions=actions)
+
+        # apply encoded actions
+        obs, rewards, dones, info = penv.step(actions=encoded_actions)
+
+        # assert zero-sum game
+        assert np.isclose(rewards[U.P1], -rewards[U.P2])
+
+        # assert rewards only from final timestep
+        if any([dones[d] for d in dones.keys()]):
+            assert np.isclose(rewards[U.P1], 
+                penv.kothgame.game_state[U.P1][U.SCORE] - penv.kothgame.game_state[U.P2][U.SCORE])
+            break
+        else:
+            assert np.isclose(rewards[U.P1], 0.0)
+
+    log_game_final_to_csv(case_num, GAME_PARAMS,penv.kothgame, './logs/sample_logfile.csv', game_type, p1_alias=U.P1+":AI", p2_alias=U.P2+":AI", associated_logfile=None)
+
+    return
+
 def run_game_humanB_v_aiA(model_path_alpha, GP, case_num):
     #Get the user's name:
     game_type = "ai_v_human"

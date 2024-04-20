@@ -368,9 +368,7 @@ def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_
     #Check if the file exists, if not, create it and write the header row
     if not os.path.exists(file_path):
         with open(file_path, 'w') as f:
-            f.write('Case_Number, Game_Type, P1_Alias, P2_Alias, P1_Score, P2_Score, Number_of_Turns, Score_Difference, P1_HVA_OOF, \
-                     P2_HVA_OOF, P1_WinScore, P2_WinScore, Max_Turns, Log_File, \
-                    n_tokens_X, ammo_X, fuel_X, engage_probs_shoot_X, n_tokens_Y, ammo_Y, fuel_Y, engage_probs_collide_Y\n')
+            f.write('Case_Number, Game_Type, P1_Alias, P2_Alias, P1_Score, P2_Score, Number_of_Turns, Score_Difference, P1_HVA_OOF, P2_HVA_OOF, P1_WinScore, P2_WinScore, Max_Turns, Log_File, n_tokens_X, ammo_X, fuel_X, engage_probs_shoot_X, n_tokens_Y, ammo_Y, fuel_Y, engage_probs_collide_Y\n')
             #Then write row_out to the file
             f.write(','.join([str(x) for x in row_out]) + '\n')
             #Close the file

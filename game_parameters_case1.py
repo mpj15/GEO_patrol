@@ -119,8 +119,8 @@ ENGAGE_PROBS = {
 
 # scoring and game termination
 IN_GOAL_POINTS = {
-    U.P1:12.0,
-    U.P2:10.0
+    U.P1:10.0,
+    U.P2:12.0
     }
 
 ADJ_GOAL_POINTS = {
@@ -134,8 +134,8 @@ FUEL_POINTS_FACTOR = {
     }
 
 FUEL_POINTS_FACTOR_BLUDGER = {
-    U.P1:0.1,
-    U.P2:0.1
+    U.P1:100/((NUM_TOKENS_PER_PLAYER[U.P1]-1)*INIT_FUEL[U.P1][U.BLUDGER]), #This should be 100/(num_bludgers*init_fuel_bludger)
+    U.P2:100/((NUM_TOKENS_PER_PLAYER[U.P2]-1)*INIT_FUEL[U.P2][U.BLUDGER]) #This should be 100/(num_bludgers*init_fuel_bludger)
     }
 
 WIN_SCORE = {
