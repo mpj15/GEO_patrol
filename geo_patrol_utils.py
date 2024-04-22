@@ -317,7 +317,7 @@ def log_game_final_to_csv(case_num, game_params, game, file_path, game_type, p1_
     beta_score = game.game_state[U.P2][U.SCORE]
     if alpha_score > beta_score:
         winner = U.P1
-    elif beta_score > alpha_score:
+    elif beta_score >= alpha_score:
         winner = U.P2
     else:
         winner = 'draw'

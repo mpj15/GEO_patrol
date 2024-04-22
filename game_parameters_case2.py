@@ -1,5 +1,19 @@
 # Game Parameters File
-# used for default OD2D and GEO Patrol version
+# ID_X 622, ID_Y 104
+# ID 65,414
+#
+# P1, Offense
+# P1 Num Tokens: 10
+# P1 Patrol Fuel: 100
+# P1 P(collide): 1.0
+#
+# P2, Defense
+# P2 Num Tokens: 8
+# P2 Ammo: 1
+# P2 Patrol Fuel: 60
+# P2 P(shoot): 0.8
+#
+# Expect: P2_win_rate 46.8%
 
 import orbit_defender2d.utils.utils as U
 
@@ -15,8 +29,8 @@ else:
     raise ValueError("MIN_RING must be >= 1")
 
 ########### initial token placement and attributes ############
-INIT_BOARD_PATTERN_P1 = [(-2,2), (-1,2), (0,2), (1,2), (2,2)] # (relative azim, number of pieces) #ALPHA IS P1, OFFENSE
-INIT_BOARD_PATTERN_P2 = [(-2,1), (-1,2), (0,2), (1,2), (2,1)] # (relative azim, number of pieces) #BETA IS P2, DEFENSE
+INIT_BOARD_PATTERN_P1 = [(-2, 1), (-1, 2), (0, 2), (1, 2), (2, 2), (3, 1)] # (relative azim, number of pieces) # P1 is Offense
+INIT_BOARD_PATTERN_P2 = [(-2,1), (-1,2), (0,2), (1,2), (2,1)] # (relative azim, number of pieces) # P2 is Defense
 
 NUM_TOKENS_PER_PLAYER = {
     U.P1: sum([a[1] for a in INIT_BOARD_PATTERN_P1])+1, #Get the number of tokens per player, plus 1 for the seeker
@@ -41,20 +55,20 @@ INIT_AMMO = {
         },
     U.P2:{
         U.SEEKER:   0,
-        U.BLUDGER:  2,
+        U.BLUDGER:  1,
         },
     }
 
-# engagement and movement parameters
+
 MIN_FUEL = 0.0
 
 FUEL_USAGE = {
     U.P1:{
         U.NOOP: 0.0,
-        U.DRIFT: 1.0, #Essentially the cost of station keeping
-        U.PROGRADE: 5.0, #make this lower than radial in/out was 10
+        U.DRIFT: 1.0, 
+        U.PROGRADE: 5.0,
         U.RETROGRADE: 5.0,
-        U.RADIAL_IN: 10.0, #These should be higher, probably 10, was 5
+        U.RADIAL_IN: 10.0, 
         U.RADIAL_OUT: 10.0,
         U.IN_SEC:{
             U.SHOOT: 5.0,
@@ -62,17 +76,17 @@ FUEL_USAGE = {
             U.GUARD: 5.0
         },
         U.ADJ_SEC:{
-            U.SHOOT: 5.0, #increased from 5
-            U.COLLIDE: 20.0, #Should be higher, was 20
+            U.SHOOT: 5.0, 
+            U.COLLIDE: 20.0,
             U.GUARD: 10.0
         }
     },
     U.P2:{
         U.NOOP: 0.0,
-        U.DRIFT: 1.0, #Essentially the cost of station keeping
-        U.PROGRADE: 5.0, #make this lower than radial in/out was 10
+        U.DRIFT: 1.0, 
+        U.PROGRADE: 5.0, 
         U.RETROGRADE: 5.0,
-        U.RADIAL_IN: 10.0, #These should be higher, probably 10, was 5
+        U.RADIAL_IN: 10.0, 
         U.RADIAL_OUT: 10.0,
         U.IN_SEC:{
             U.SHOOT: 5.0,
@@ -80,8 +94,8 @@ FUEL_USAGE = {
             U.GUARD: 5.0
         },
         U.ADJ_SEC:{
-            U.SHOOT: 5.0, #increased from 5
-            U.COLLIDE: 20.0, #Should be higher, was 20
+            U.SHOOT: 5.0, 
+            U.COLLIDE: 20.0, 
             U.GUARD: 10.0
         }
     }
@@ -93,12 +107,12 @@ ENGAGE_PROBS = {
         U.IN_SEC:{
             U.NOOP: 1.0,
             U.SHOOT: 0.8, 
-            U.COLLIDE: 0.8,
+            U.COLLIDE: 1.0,
             U.GUARD: 0.8},
         U.ADJ_SEC:{
             U.NOOP: 1.0,
-            U.SHOOT: 0.4, #These should be lower, maybe 0.3,0.4,0.5
-            U.COLLIDE: 0.4,
+            U.SHOOT: 0.4,
+            U.COLLIDE: 0.5,
             U.GUARD: 0.4
         }
     },
@@ -110,7 +124,7 @@ ENGAGE_PROBS = {
             U.GUARD: 0.8},
         U.ADJ_SEC:{
             U.NOOP: 1.0,
-            U.SHOOT: 0.4, #These should be lower, maybe 0.3,0.4,0.5
+            U.SHOOT: 0.4, 
             U.COLLIDE: 0.4,
             U.GUARD: 0.4
         }
@@ -134,8 +148,8 @@ FUEL_POINTS_FACTOR = {
     }
 
 FUEL_POINTS_FACTOR_BLUDGER = {
-    U.P1:100/((NUM_TOKENS_PER_PLAYER[U.P1]-1)*INIT_FUEL[U.P1][U.BLUDGER]), #This should be 100/(num_bludgers*init_fuel_bludger)
-    U.P2:100/((NUM_TOKENS_PER_PLAYER[U.P2]-1)*INIT_FUEL[U.P2][U.BLUDGER]) #This should be 100/(num_bludgers*init_fuel_bludger)
+    U.P1:100/((NUM_TOKENS_PER_PLAYER[U.P1]-1)*INIT_FUEL[U.P1][U.BLUDGER]), 
+    U.P2:100/((NUM_TOKENS_PER_PLAYER[U.P2]-1)*INIT_FUEL[U.P2][U.BLUDGER]) 
     }
 
 WIN_SCORE = {
@@ -144,4 +158,4 @@ WIN_SCORE = {
     }
 
 ILLEGAL_ACT_SCORE = -1000.0
-MAX_TURNS = 50 #reduced from 100 to 50
+MAX_TURNS = 50 

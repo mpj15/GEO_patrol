@@ -16,6 +16,7 @@ import game_parameters_default as DGP
 import game_parameters_case1 as GP_1
 import game_parameters_case2 as GP_2
 import game_parameters_case3 as GP_3
+import game_parameters_case4 as GP_4
 
 CSV_FILE_PATH = './logs/logfile.csv'
 
@@ -26,6 +27,8 @@ def ai_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
         GP = GP_2
     elif case_num == 3:
         GP = GP_3
+    elif case_num == 4:
+        GP = GP_4
     else:
         GP = DGP
     run_game_ai_vs_ai(model_path_alpha,model_path_beta, GP, case_num)
@@ -37,16 +40,16 @@ def human_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
         GP = GP_2
     elif case_num == 3:
         GP = GP_3
+    elif case_num == 4:
+        GP = GP_4
     else:
         GP = DGP
-    
     if model_path_alpha == None and model_path_beta == None:
         print("Both model paths are None. Exiting.")
         return
     elif model_path_alpha != None and model_path_beta != None:
         print("Both model paths are not None. Exiting.")
         return
-    
     if model_path_alpha == None:
            #The computer plays as beta, player 2, and the human plays as alpha, player 1
            #Alpha is offense and beta is defense, so human in this case is offense
@@ -63,16 +66,15 @@ def run_server_client_game_mode(gs_host_addr,case_num):
         GP = GP_2
     elif case_num == 3:
         GP = GP_3
+    elif case_num == 4:
+        GP = GP_4
     else:
         GP = DGP
     run_server_client_game(gs_host_addr, GP, case_num)
 
 
-
 def run_game_ai_vs_ai(model_path_alpha, model_path_beta, GP, case_num):
-    
     game_type = "ai_v_ai"
-
     GAME_PARAMS = koth.KOTHGameInputArgs(
         max_ring=GP.MAX_RING,
         min_ring=GP.MIN_RING,
