@@ -17,7 +17,7 @@ from time import sleep
 CSV_FILE_PATH = './logs/server_game_logs.csv'
 GAME_TYPE = 'human_vs_human'
 CASE_NUM = 1
-import game_parameters_case1 as GP
+import game_parameters_case2 as GP
 #############################################
 
 # Game Parameters
@@ -383,7 +383,7 @@ def run_listener(game_server, listener_client, render=True):
         if tmp_game_state[GS.GAME_DONE] is True:
             koth.print_endgame_status(local_game)
             koth.log_game_to_file(local_game, logfile)
-            log_game_final_to_csv(CASE_NUM,GP,local_game,CSV_FILE_PATH,GAME_TYPE,p1_alias=p1_alias,p2_alias=p2_alias)
+            log_game_final_to_csv(CASE_NUM,GAME_PARAMS,local_game,CSV_FILE_PATH,GAME_TYPE,p1_alias=p1_alias,p2_alias=p2_alias)
             break
         print("Waiting for game to finish")
         sleep(1)
