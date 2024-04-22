@@ -353,6 +353,7 @@ def run_listener(game_server, listener_client, render=True):
             engagement_outcomes = listener_client.engagement_outcomes
             eg_outs_tuple_list = local_game.arbitrary_engagement_outcomes_from_server(engagement_outcomes=engagement_outcomes)[0]
             local_game.engagement_outcomes = eg_outs_tuple_list
+            koth.print_engagement_outcomes(local_game.engagement_outcomes)
             penv.kothgame.engagement_outcomes = eg_outs_tuple_list
             penv.actions = local_game.arbitrary_engagement_outcomes_from_server(engagement_outcomes=engagement_outcomes)[1]
         else:

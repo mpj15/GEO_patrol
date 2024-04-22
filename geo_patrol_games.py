@@ -812,6 +812,8 @@ def run_server_client_game(gs_host_addr, GP, case_num):
         #update the local_game with the new game state from the server and update the render
         if plr_client.engagement_outcomes is not None:
             local_game.engagement_outcomes = local_game.arbitrary_engagement_outcomes_from_server(plr_client.engagement_outcomes)[0]
+            koth.print_engagement_outcomes(local_game.engagement_outcomes)
+            penv.actions = local_game.arbitrary_engagement_outcomes_from_server(plr_client.engagement_outcomes)[1]
             plr_client.engagement_outcomes = None
         penv.kothgame = local_game
         if actions_dict is not None:
