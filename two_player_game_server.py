@@ -346,7 +346,7 @@ def run_listener(game_server, listener_client, render=True):
                     new_dict[key] = U.EngagementOutcomeTuple(action_type=value[0], attacker=value[1], target=value[2], guardian=value[3], prob=value[4], success=value[5])
                 elif len(value) == 1: #movement 
                     new_dict[key] = U.MovementTuple(action_type=value[0])
-            penv.actions = new_dict
+            #penv.actions = new_dict
             actions_dict = new_dict
         
         if listener_client.engagement_outcomes is not None:
