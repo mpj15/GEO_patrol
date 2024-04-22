@@ -1,7 +1,7 @@
 import time
 import geo_patrol_games as gpg
 
-GS_HOST_ADDR = "192.168.1.11"
+GS_HOST_ADDR = "10.47.7.76"
 
 MODEL_PATH_ALPHA = "./policies/model_O3_6500.pt"
 MODEL_PATH_BETA = "./policies/model_D4_9600.pt"
