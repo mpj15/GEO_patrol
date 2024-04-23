@@ -8,10 +8,10 @@
 # P1 P(collide): 1.0
 #
 # P2, Defense
-# P2 Num Tokens: 4
-# P2 Ammo: 3
+# P2 Num Tokens: 7
+# P2 Ammo: 4
 # P2 Patrol Fuel: 80
-# P2 P(shoot): 1.0
+# P2 P(shoot): 0.8
 #
 # Expect: P2_win_rate 48%, but suspiciously low, much higher (82%) against ID_Y 103 and 104.
 
