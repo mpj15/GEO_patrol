@@ -1,10 +1,10 @@
 # Game Parameters File
 # ID_X 356, ID_Y 104
-# ID 37,484
+# ID 37,481
 #
 # P1, Offense
 # P1 Num Tokens: 10
-# P1 Patrol Fuel: 100
+# P1 Patrol Fuel: 80
 # P1 P(collide): 1.0
 #
 # P2, Defense
@@ -13,7 +13,7 @@
 # P2 Patrol Fuel: 80
 # P2 P(shoot): 1.0
 #
-# Expect: P2_win_rate 67%
+# Expect: P2_win_rate 17%
 
 import orbit_defender2d.utils.utils as U
 
@@ -40,7 +40,7 @@ NUM_TOKENS_PER_PLAYER = {
 INIT_FUEL = {
     U.P1:{
         U.SEEKER:   100.0,
-        U.BLUDGER:  100.0,
+        U.BLUDGER:  80.0,
         },
     U.P2:{
         U.SEEKER:   100.0,

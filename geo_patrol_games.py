@@ -17,6 +17,7 @@ import game_parameters_case1 as GP_1
 import game_parameters_case2 as GP_2
 import game_parameters_case3 as GP_3
 import game_parameters_case4 as GP_4
+import game_parameters_case5 as GP_5
 
 CSV_FILE_PATH = './logs/logfile.csv'
 
@@ -29,6 +30,8 @@ def ai_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
         GP = GP_3
     elif case_num == 4:
         GP = GP_4
+    elif case_num == 5:
+        GP = GP_5
     else:
         GP = DGP
     run_game_ai_vs_ai(model_path_alpha,model_path_beta, GP, case_num)
@@ -42,6 +45,8 @@ def human_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
         GP = GP_3
     elif case_num == 4:
         GP = GP_4
+    elif case_num == 5:
+        GP = GP_5
     else:
         GP = DGP
     if model_path_alpha == None and model_path_beta == None:
@@ -68,6 +73,8 @@ def run_server_client_game_mode(gs_host_addr,case_num):
         GP = GP_3
     elif case_num == 4:
         GP = GP_4
+    elif case_num == 5:
+        GP = GP_5
     else:
         GP = DGP
     run_server_client_game(gs_host_addr, GP, case_num)
