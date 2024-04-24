@@ -23,9 +23,10 @@ def get_case_num():
     print("2. Case 2")
     print("3. Case 3")
     print("4. Case 4")
+    print("5. Case 5")
     case_num = int(input("Enter your choice: "))
     #check if the input is valid
-    while case_num < 0 or case_num > 4:
+    while case_num < 0 or case_num > 5:
         print("Invalid choice. Please try again.")
         case_num = int(input("Enter your choice: "))
     return case_num
