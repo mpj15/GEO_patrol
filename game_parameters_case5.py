@@ -1,5 +1,5 @@
 # Game Parameters File
-# ID_X 356, ID_Y 104
+# ID_X 356, ID_Y 101
 # ID 37,481
 #
 # P1, Offense
