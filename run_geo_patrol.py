@@ -34,7 +34,13 @@ def get_case_num():
 def run():
     while True:
         start_screen()
-        gameMode = int(input("Enter your choice: "))
+        gameMode = input("Enter your choice: ")
+        try:
+            gameMode = int(gameMode)
+        except:
+            print("Invalid choice. Please try again.")
+            time.sleep(1)
+            continue
         #If user chooses 1, run AIvsAI.py
         if gameMode == 1:
             #run run_AI_vs_AI as a demo
