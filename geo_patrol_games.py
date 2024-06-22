@@ -1,5 +1,8 @@
-# this is meant as a tool for running a complete koth game
-# where policies are based on one or two saved policies from checkpoints
+# Copyright (c) 2024, Michael P. Jones (mpj@alum.mit.edu)
+# SPDX-License-Identifier: MIT
+#
+# Description: This script contains the functions that run the game in different modes.
+
 import numpy as np
 import orbit_defender2d.utils.utils as U
 import orbit_defender2d.king_of_the_hill.game_server as GS

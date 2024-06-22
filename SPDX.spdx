@@ -1,0 +1,5 @@
+SPDXVersion: SPDX-2.1
+PackageName: resgame_staging
+PackageOriginator: Michael P. Jones (mpj@alum.mit.edu)
+PackageHomePage: https://github.com/mpj15/resgame_staging
+PackageLicenseDeclared: MIT

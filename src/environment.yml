@@ -1,0 +1,10 @@
+
+name: orbit_defender2d
+dependencies:
+  - python=3.8
+  - ipython   # convenience dependency
+  - pytest    # package testing
+  - hypothesis # package testing
+  - pip
+  - pip:
+    - -r requirements.txt

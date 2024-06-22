@@ -1,7 +1,13 @@
+# This is the main script to run the GEO Patrol game from a command line
+# Copyright (c) 2024, Michael P. Jones (mpj@alum.mit.edu)
+# SPDX-License-Identifier: MIT
+
+
+
 import time
 import geo_patrol_games as gpg
 
-GS_HOST_ADDR = "10.47.7.76"
+GS_HOST_ADDR = "10.47.7.76" # Adjust as needed
 
 MODEL_PATH_ALPHA = "./policies/model_O3_6500.pt"
 MODEL_PATH_BETA = "./policies/model_D4_9600.pt"
