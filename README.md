@@ -7,6 +7,10 @@ Also the OD2D repo's wiki: https://github.com/mpj15/spacegym-od2d/wiki
 
 GEO Patrol is an asymmetric version of the baseline OD2D game. In GEO Patrol, one side plays offense, with more Patrol satellites with more fuel but no ammo. The other side plays defense, with fewer Patrol satellites and less fuel but more firepower.
 
+Developed by Michael Jones, mpj@alum.mit.edu.
+
+Distributed under an MIT License. See license file and SPDX file for details.
+
 ## Installation
 
 To install, run the following in a terminal with conda installed:

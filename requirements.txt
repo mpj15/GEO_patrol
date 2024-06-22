@@ -1,5 +1,3 @@
-#git+ssh://git@llcad-github.llan.ll.mit.edu/MAST/orbit_defender2d.git@master
-#git:https://github.com/mpj15/spacegym-od2d.git@main
 pip==21.0
 setuptools==65.5.0
 bidict

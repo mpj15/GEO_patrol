@@ -1,7 +1,13 @@
+# This is the main script to run the GEO Patrol game from a command line
+# Copyright (c) 2024, Michael P. Jones (mpj@alum.mit.edu)
+# SPDX-License-Identifier: MIT
+
+
+
 import time
 import geo_patrol_games as gpg
 
-GS_HOST_ADDR = "192.168.1.11"
+GS_HOST_ADDR = "10.47.7.76" # Adjust as needed
 
 MODEL_PATH_ALPHA = "./policies/model_O3_6500.pt"
 MODEL_PATH_BETA = "./policies/model_D4_9600.pt"
@@ -23,9 +29,10 @@ def get_case_num():
     print("2. Case 2")
     print("3. Case 3")
     print("4. Case 4")
+    print("5. Case 5")
     case_num = int(input("Enter your choice: "))
     #check if the input is valid
-    while case_num < 0 or case_num > 4:
+    while case_num < 0 or case_num > 5:
         print("Invalid choice. Please try again.")
         case_num = int(input("Enter your choice: "))
     return case_num
@@ -33,7 +40,13 @@ def get_case_num():
 def run():
     while True:
         start_screen()
-        gameMode = int(input("Enter your choice: "))
+        gameMode = input("Enter your choice: ")
+        try:
+            gameMode = int(gameMode)
+        except:
+            print("Invalid choice. Please try again.")
+            time.sleep(1)
+            continue
         #If user chooses 1, run AIvsAI.py
         if gameMode == 1:
             #run run_AI_vs_AI as a demo

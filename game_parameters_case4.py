@@ -13,7 +13,7 @@
 # P2 Patrol Fuel: 80
 # P2 P(shoot): 1.0
 #
-# Expect: P2_win_rate 17%
+# Expect: P2_win_rate 67%
 
 import orbit_defender2d.utils.utils as U
 

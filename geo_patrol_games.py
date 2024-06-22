@@ -1,5 +1,8 @@
-# this is meant as a tool for running a complete koth game
-# where policies are based on one or two saved policies from checkpoints
+# Copyright (c) 2024, Michael P. Jones (mpj@alum.mit.edu)
+# SPDX-License-Identifier: MIT
+#
+# Description: This script contains the functions that run the game in different modes.
+
 import numpy as np
 import orbit_defender2d.utils.utils as U
 import orbit_defender2d.king_of_the_hill.game_server as GS
@@ -17,6 +20,7 @@ import game_parameters_case1 as GP_1
 import game_parameters_case2 as GP_2
 import game_parameters_case3 as GP_3
 import game_parameters_case4 as GP_4
+import game_parameters_case5 as GP_5
 
 CSV_FILE_PATH = './logs/logfile.csv'
 
@@ -29,6 +33,8 @@ def ai_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
         GP = GP_3
     elif case_num == 4:
         GP = GP_4
+    elif case_num == 5:
+        GP = GP_5
     else:
         GP = DGP
     run_game_ai_vs_ai(model_path_alpha,model_path_beta, GP, case_num)
@@ -42,6 +48,8 @@ def human_v_ai_game_mode(model_path_alpha, model_path_beta, case_num):
         GP = GP_3
     elif case_num == 4:
         GP = GP_4
+    elif case_num == 5:
+        GP = GP_5
     else:
         GP = DGP
     if model_path_alpha == None and model_path_beta == None:
@@ -68,6 +76,8 @@ def run_server_client_game_mode(gs_host_addr,case_num):
         GP = GP_3
     elif case_num == 4:
         GP = GP_4
+    elif case_num == 5:
+        GP = GP_5
     else:
         GP = DGP
     run_server_client_game(gs_host_addr, GP, case_num)
@@ -812,6 +822,8 @@ def run_server_client_game(gs_host_addr, GP, case_num):
         #update the local_game with the new game state from the server and update the render
         if plr_client.engagement_outcomes is not None:
             local_game.engagement_outcomes = local_game.arbitrary_engagement_outcomes_from_server(plr_client.engagement_outcomes)[0]
+            koth.print_engagement_outcomes(local_game.engagement_outcomes)
+            penv.actions = local_game.arbitrary_engagement_outcomes_from_server(plr_client.engagement_outcomes)[1]
             plr_client.engagement_outcomes = None
         penv.kothgame = local_game
         if actions_dict is not None:

@@ -1,5 +1,9 @@
 # Write a powershell script to open a new command window, cd to ~\GEO_patrol, run conda activate geo_patrol, and then run python od2d.py
 # This script is used to run the od2d.py script in a new command window with the correct environment activated
+#
+# Copyright (c) 2024, Michael P. Jones (mpj@alum.mit.edu)
+# SPDX-License-Identifier: MIT
+
 
 $directory = "."
 $conda_env = "geo_patrol"

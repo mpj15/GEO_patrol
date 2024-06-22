@@ -1,6 +1,6 @@
 # Game Parameters File
-# ID_X 595, ID_Y 101
-# ID 62,576
+# ID_X 356, ID_Y 101
+# ID 37,481
 #
 # P1, Offense
 # P1 Num Tokens: 10
@@ -8,12 +8,12 @@
 # P1 P(collide): 1.0
 #
 # P2, Defense
-# P2 Num Tokens: 7
-# P2 Ammo: 4
+# P2 Num Tokens: 4
+# P2 Ammo: 3
 # P2 Patrol Fuel: 80
-# P2 P(shoot): 0.8
+# P2 P(shoot): 1.0
 #
-# Expect: P2_win_rate 48%, but suspiciously low, much higher (82%) against ID_Y 103 and 104.
+# Expect: P2_win_rate 17%
 
 import orbit_defender2d.utils.utils as U
 
@@ -30,7 +30,7 @@ else:
 
 ########### initial token placement and attributes ############
 INIT_BOARD_PATTERN_P1 = [(-2, 1), (-1, 2), (0, 2), (1, 2), (2, 2), (3, 1)] # (relative azim, number of pieces) # P1 is Offense
-INIT_BOARD_PATTERN_P2 = [(-1, 2), (0, 2), (1, 2), (2, 1)] # (relative azim, number of pieces) # P2 is Defense
+INIT_BOARD_PATTERN_P2 = [(-1, 1), (0, 2), (1, 1)] # (relative azim, number of pieces) # P2 is Defense
 
 NUM_TOKENS_PER_PLAYER = {
     U.P1: sum([a[1] for a in INIT_BOARD_PATTERN_P1])+1, #Get the number of tokens per player, plus 1 for the seeker
@@ -55,7 +55,7 @@ INIT_AMMO = {
         },
     U.P2:{
         U.SEEKER:   0,
-        U.BLUDGER:  4,
+        U.BLUDGER:  3,
         },
     }
 
@@ -119,12 +119,12 @@ ENGAGE_PROBS = {
     U.P2:{
         U.IN_SEC:{
             U.NOOP: 1.0,
-            U.SHOOT: 0.8, 
+            U.SHOOT: 1.0, 
             U.COLLIDE: 0.8,
             U.GUARD: 0.8},
         U.ADJ_SEC:{
             U.NOOP: 1.0,
-            U.SHOOT: 0.4, 
+            U.SHOOT: 0.5, 
             U.COLLIDE: 0.4,
             U.GUARD: 0.4
         }
