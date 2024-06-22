@@ -1,3 +1,6 @@
+# Copyright (c) 2024, Michael P. Jones (mpj@alum.mit.edu)
+# SPDX-License-Identifier: MIT
+
 import os
 import datetime
 import orbit_defender2d.utils.utils as U
