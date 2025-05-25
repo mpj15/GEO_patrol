@@ -21,7 +21,7 @@ from time import sleep
 CSV_FILE_PATH = './logs/server_game_logs.csv'
 GAME_TYPE = 'human_vs_human'
 CASE_NUM = 1
-import game_parameters_case2 as GP
+import game_parameters_default as GP
 #############################################
 
 # Game Parameters

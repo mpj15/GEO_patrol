@@ -775,7 +775,7 @@ def run_server_client_game(gs_host_addr, GP, case_num):
 
         else: #Game state is not DRIFT. Need to get new actions and send to server
             #update the local_game with the new game state from the server
-            local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = GS.arbitrary_game_state_from_server(GP,cur_game_state)
+            local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = GS.arbitrary_game_state_from_server(GAME_PARAMS,cur_game_state)
 
             #actions_dict = local_game.get_input_actions(plr_client.player_id)
             #Get the actions from the player
@@ -804,7 +804,7 @@ def run_server_client_game(gs_host_addr, GP, case_num):
             cur_game_state = plr_client.game_state
 
         if cur_game_state[GS.GAME_DONE] is True:
-            local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = GS.arbitrary_game_state_from_server(GP,cur_game_state)
+            local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = GS.arbitrary_game_state_from_server(GAME_PARAMS,cur_game_state)
             koth.print_endgame_status(local_game)
             koth.log_game_to_file(local_game, logfile)
             if plr_client.player_id == U.P1:
@@ -834,8 +834,8 @@ def run_server_client_game(gs_host_addr, GP, case_num):
             koth.log_game_to_file(local_game, logfile=logfile)
         penv.render(mode="human")
 
-        local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = GS.arbitrary_game_state_from_server(GP,cur_game_state)
-        
+        local_game.game_state, local_game.token_catalog, local_game.n_tokens_alpha, local_game.n_tokens_beta = GS.arbitrary_game_state_from_server(GAME_PARAMS,cur_game_state)
+
         #check if plr_client has attribute engagement_outcomes
         #if plr_client.engagement_outcomes is not None:
         #    with open(logfile, 'a') as f:
